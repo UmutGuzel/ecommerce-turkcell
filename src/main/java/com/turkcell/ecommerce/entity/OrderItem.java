@@ -19,6 +19,7 @@ import java.util.UUID;
 public class OrderItem {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="status")
     private String status;

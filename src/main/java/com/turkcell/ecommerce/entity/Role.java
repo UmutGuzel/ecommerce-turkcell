@@ -1,15 +1,13 @@
 package com.turkcell.ecommerce.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -21,7 +19,18 @@ import java.util.UUID;
 public class Role {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="name")
     private String name;
+
+    @ManyToMany
+    @JoinTable(
+            name = "roles_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private List<Permission> permissions;
+
+    @ManyToMany(mappedBy = "roles")
+    private List<User> users;
 }
