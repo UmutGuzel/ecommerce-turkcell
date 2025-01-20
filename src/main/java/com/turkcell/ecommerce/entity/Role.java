@@ -1,15 +1,13 @@
 package com.turkcell.ecommerce.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -24,4 +22,8 @@ public class Role {
     private UUID id;
     @Column(name="name")
     private String name;
+
+    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL)
+    private List<UserRole> userRoles;
+
 }
