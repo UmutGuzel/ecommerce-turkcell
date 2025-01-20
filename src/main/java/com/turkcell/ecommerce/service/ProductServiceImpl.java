@@ -21,7 +21,6 @@ public class ProductServiceImpl implements ProductService{
         this.categoryService = categoryService;
     }
 
-    @Override
     public void add(CreateProductDto createProductDto) {
 
 
@@ -41,12 +40,10 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
-    @Override
     public void update(UpdateProductDto updateProductDto) {
 
     }
 
-    @Override
     public List<ProductListingDto> getAll() {
 
             List<ProductListingDto> productListingDtos = productRepository
@@ -56,6 +53,11 @@ public class ProductServiceImpl implements ProductService{
                     .toList();
 
             return productListingDtos;
+
+    }
+
+    @Override
+    public void add(Product product) {
 
     }
 }
