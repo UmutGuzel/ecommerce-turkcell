@@ -1,4 +1,4 @@
 package com.turkcell.ecommerce.service;
 
-public interface CategoryService {
+public interface PermissionService {
 }

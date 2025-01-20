@@ -15,15 +15,17 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "order_statuses")
-public class OrderStatus {
+@Table(name = "permissions")
+public class Permission {
     @Id
     @UuidGenerator
     @Column(name="id")
     private UUID id;
-    @Column(name="status")
-    private String status;
+    @Column(name="name")
+    private String name;
+    @Column(name="description")
+    private String description;
 
-    @OneToMany(mappedBy = "orderStatus", cascade = CascadeType.ALL)
-    private List<Order> orders;
+    @ManyToMany(mappedBy = "permissions")
+    private List<Role> roles;
 }

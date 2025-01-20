@@ -19,11 +19,18 @@ import java.util.UUID;
 public class Role {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="name")
     private String name;
 
-    @OneToMany(mappedBy = "role",cascade = CascadeType.ALL)
-    private List<UserRole> userRoles;
+    @ManyToMany
+    @JoinTable(
+            name = "roles_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private List<Permission> permissions;
 
+    @ManyToMany(mappedBy = "roles")
+    private List<User> users;
 }

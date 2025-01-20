@@ -20,6 +20,7 @@ import java.util.UUID;
 public class Order {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="created_at")
     private Date createdAt;

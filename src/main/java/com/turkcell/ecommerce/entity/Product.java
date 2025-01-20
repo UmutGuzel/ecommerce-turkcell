@@ -17,6 +17,7 @@ import java.util.UUID;
 public class Product {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="name")
     private String name;

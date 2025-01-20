@@ -20,6 +20,7 @@ import java.util.UUID;
 public class Cart {
     @Id
     @UuidGenerator
+    @Column(name="id")
     private UUID id;
     @Column(name="created_at")
     private Date createdAt;
