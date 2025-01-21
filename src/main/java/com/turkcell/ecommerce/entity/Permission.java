@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,11 @@ public class Permission {
     private String name;
     @Column(name="description")
     private String description;
+
+    @Column(name="created_at")
+    private Date createdAt;
+    @Column(name="updated_at")
+    private Date updatedAt;
 
     @ManyToMany(mappedBy = "permissions")
     private List<Role> roles;

@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.UUID;
 
 @Getter
@@ -23,6 +24,11 @@ public class OrderItem {
     private UUID id;
     @Column(name="status")
     private String status;
+
+    @Column(name="created_at")
+    private Date createdAt;
+    @Column(name="updated_at")
+    private Date updatedAt;
 
     @Column(name="price")
     private BigDecimal price;
