@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -29,5 +30,5 @@ public class CreateProductDto {
     private Integer stock;
 
     @NotNull(message = "Categori alanı boş bırakılamaz.")
-    private Integer categoryId;
+    private UUID categoryId;
 }
