@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,11 @@ public class Product {
     private Integer stock;
     @Column(name="image")
     private String image;
+
+    @Column(name="created_at")
+    private Date createdAt;
+    @Column(name="updated_at")
+    private Date updatedAt;
 
     @ManyToOne
     @JoinColumn(name="category_id")
@@ -99,5 +105,21 @@ public class Product {
 
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
