@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -29,7 +30,7 @@ public class CategoryController {
     }
 
     @PostMapping("/{parentId}/subcategories")
-    public ResponseEntity<Category> addSubcategory(@PathVariable Integer id, @Valid @RequestBody CreateCategoryDto createCategoryDto) {
+    public ResponseEntity<Category> addSubcategory(@PathVariable UUID id, @Valid @RequestBody CreateCategoryDto createCategoryDto) {
         Category createdSubcategory = categoryService.addSubcategory(id, createCategoryDto); // Alt kategori ekle
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSubcategory);
     }

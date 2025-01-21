@@ -1,9 +1,12 @@
 package com.turkcell.ecommerce.controller;
 
 import com.turkcell.ecommerce.dto.user.CreateUserDto;
+import com.turkcell.ecommerce.dto.user.ListUserDto;
 import com.turkcell.ecommerce.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -14,9 +17,8 @@ public class UserController {
    }
 
    @GetMapping("/all")
-    public void getAll() {
-        userService.getAll();
-        //TODO: implement
+    public List<ListUserDto> getAll() {
+        return userService.getAll();
     }
 
    @PostMapping

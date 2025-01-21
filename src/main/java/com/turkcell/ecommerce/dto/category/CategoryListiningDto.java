@@ -1,9 +1,15 @@
 package com.turkcell.ecommerce.dto.category;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
+@Getter
+@Setter
+
 public class CategoryListiningDto {
-    private int id;
+    private UUID id;
     private String name;
     public CategoryListiningDto(UUID id, String name) {
         this.id = id;
@@ -11,19 +17,4 @@ public class CategoryListiningDto {
 
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

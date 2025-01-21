@@ -3,8 +3,6 @@ package com.turkcell.ecommerce.service;
 import com.turkcell.ecommerce.dto.orderitem.CreateOrderItemDto;
 import com.turkcell.ecommerce.dto.orderitem.OrderItemListiningDto;
 import com.turkcell.ecommerce.dto.orderitem.UpdateOrderItemDto;
-import com.turkcell.ecommerce.dto.product.ProductListingDto;
-import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.entity.Order;
 import com.turkcell.ecommerce.entity.OrderItem;
 import com.turkcell.ecommerce.entity.Product;
@@ -14,13 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class OrderItemImpl implements OrderItemService{
+public class OrderItemServiceImpl implements OrderItemService{
 
     private final ProductService productService;
     private final OrderService orderService;
     private final OrderItemRepository orderItemRepository;
 
-    public OrderItemImpl(ProductService productService, OrderService orderService, OrderItemRepository orderItemRepository) {
+    public OrderItemServiceImpl(ProductService productService, OrderService orderService, OrderItemRepository orderItemRepository) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderItemRepository = orderItemRepository;
