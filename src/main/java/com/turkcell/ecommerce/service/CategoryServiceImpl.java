@@ -16,13 +16,8 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Optional<Category> findById(int id) {
-        return categoryRepository.findById(id);
-    }
-
-
     @Override
     public Optional<Category> findById(Integer id) {
-        return Optional.empty();
+        return categoryRepository.findById(id);
     }
 }

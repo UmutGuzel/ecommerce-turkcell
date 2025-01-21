@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,11 +19,16 @@ import java.util.UUID;
 @Table(name = "categories")
 public class Category {
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
-    private UUID id;
+    private Integer id;
     @Column(name="name")
     private String name;
+
+    @Column(name="created_at")
+    private Date createdAt;
+    @Column(name="updated_at")
+    private Date updatedAt;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
