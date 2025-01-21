@@ -4,21 +4,22 @@ package com.turkcell.ecommerce.dto.product;
 import com.turkcell.ecommerce.entity.Category;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public class UpdateProductDto {
 
-    private Integer id;
+    private UUID id;
     private String name;
-    private String description;
+    private String image;
     private BigDecimal price;
     private int stock;
     private Category category;
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -30,12 +31,12 @@ public class UpdateProductDto {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getImage() {
+        return image;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public BigDecimal getPrice() {

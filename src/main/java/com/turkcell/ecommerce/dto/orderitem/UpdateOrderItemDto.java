@@ -1,45 +1,23 @@
-package com.turkcell.ecommerce.entity;
+package com.turkcell.ecommerce.dto.orderitem;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.UuidGenerator;
+import com.turkcell.ecommerce.entity.Order;
+import com.turkcell.ecommerce.entity.Product;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.util.UUID;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Entity
-@Table(name = "order_items")
-public class OrderItem {
-    @Id
-    @UuidGenerator
-    @Column(name="id")
+public class UpdateOrderItemDto {
+
     private UUID id;
-    @Column(name="status")
     private String status;
 
-    @Column(name="created_at")
-    private Date createdAt;
-    @Column(name="updated_at")
-    private Date updatedAt;
 
-    @Column(name="price")
     private BigDecimal price;
-    @Column(name="quantity")
     private Integer quantity;
-
-    @ManyToOne
-    @JoinColumn(name="order_id")
     private Order order;
-    @ManyToOne
-    @JoinColumn(name="product_id")
     private Product product;
 
     public UUID getId() {

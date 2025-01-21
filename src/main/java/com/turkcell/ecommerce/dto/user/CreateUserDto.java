@@ -1,10 +1,6 @@
 package com.turkcell.ecommerce.dto.user;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
@@ -16,15 +12,19 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CreateUserDto {
-    @NotEmpty
+    @NotBlank(message = "İsim alanı boş bırakılamaz.")
     private String name;
+
+    @NotBlank(message = "Soyisim alanı boş bırakılamaz.")
     private String surname;
-    @Email(message = "Eposta uygun formatta değil", regexp = "^[A-Za-z0-9+_.-]+@(.+)$")
-    @NotEmpty
+
+    @Email(message = "Eposta uygun formatta değil", regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+    @NotBlank(message = "Eposta alanı boş bırakılamaz.")
     private String email;
+
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message="Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.")
-    @Length(min=8, message = "Şifre en az 8 karakter olmalıdır.")
-    @NotEmpty(message = "Şifre boş olamaz")
+    @Length(min=8)
+    @NotBlank
     private String password;
-    private List<UUID> roleIds;
+    //private List<UUID> roleIds;
 }

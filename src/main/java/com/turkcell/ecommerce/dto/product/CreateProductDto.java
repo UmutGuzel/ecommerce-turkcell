@@ -1,70 +1,33 @@
 package com.turkcell.ecommerce.dto.product;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
+@Getter
+@Setter
 public class CreateProductDto {
 
-    @NotBlank
-    @Length(min = 2, max = 100)
+    @NotBlank(message = "Ürün adı boş bırakılamaz.")
+    @Length(max = 50, message = "Ürün adı 50 karakterden uzun olamaz.")
     private String name;
+
+    @Length(max = 500, message = "Açıklama 500 karakterden uzun olamaz.")
+    private String description;
 
     private String image;
 
-    @NotBlank
-    @PositiveOrZero
+    @NotNull(message = "Fiyat alanı boş bırakılamaz.")
+    @Positive(message = "Fiyat 0'dan büyük olmalı.")
     private BigDecimal price;
 
-    @NotBlank
-    @PositiveOrZero
-    private int stock;
+    @NotNull(message = "Stok alanı boş bırakılamaz.")
+    @PositiveOrZero(message = "Stok miktarı 0'dan küçük olamaz.")
+    private Integer stock;
 
-    @NotBlank
-    private int categoryId;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
+    @NotNull(message = "Categori alanı boş bırakılamaz.")
+    private Integer categoryId;
 }
