@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class ProductServiceImpl implements ProductService{
 
@@ -61,5 +64,15 @@ public class ProductServiceImpl implements ProductService{
 
             return productListingDtos;
 
+    }
+
+    @Override
+    public Optional<Product> findById(UUID id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Product> findProductsByCategoryId(UUID categoryId) {
+        return Optional.empty();
     }
 }

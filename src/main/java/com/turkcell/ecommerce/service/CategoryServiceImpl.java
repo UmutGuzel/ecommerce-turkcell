@@ -5,6 +5,7 @@ import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.repository.CategoryRepository;
+import com.turkcell.ecommerce.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,11 @@ import java.util.UUID;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final ProductService productService;
+    private final ProductRepository productRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductService productService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
-        this.productService = productService;
+        this.productRepository = productRepository;
     }
 
     public Category createCategory(@Valid CreateCategoryDto createCategoryDto) {
@@ -36,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category addSubcategory(Integer id,@Valid CreateCategoryDto createCategoryDto) {
+    public Category addSubcategory(UUID id,@Valid CreateCategoryDto createCategoryDto) {
 
         Category parentCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid parent category ID."));
@@ -70,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
             Category category = categoryRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Silinecek kategori bulunamadı."));
 
-        Optional<Product> products = productService.findProductsByCategoryId(id);
+        Optional<Product> products = productRepository.findById(id);
         if (!products.isEmpty()) {
             throw new IllegalArgumentException("Bu kategori, ürünlerle ilişkilendirilmiş olduğundan silinemez.");
         }
