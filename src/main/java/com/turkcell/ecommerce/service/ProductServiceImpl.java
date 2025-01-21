@@ -8,8 +8,10 @@ import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class ProductServiceImpl implements ProductService{
 
@@ -41,6 +43,19 @@ public class ProductServiceImpl implements ProductService{
     }
 
     public void update(UpdateProductDto updateProductDto) {
+        Category category = categoryService
+                .findById(updateProductDto.getId())
+                .orElse(null);
+
+        Product productToUpdate = productRepository.findById(updateProductDto.getId()).orElse(null);
+
+        productToUpdate.setName(updateProductDto.getName());
+        productToUpdate.setPrice(updateProductDto.getPrice());
+        productToUpdate.setStock(updateProductDto.getStock());
+        productToUpdate.setCategory(category);
+        productToUpdate.setImage(updateProductDto.getImage());
+        productRepository.save(productToUpdate);
+
 
     }
 
@@ -57,7 +72,14 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public void add(Product product) {
-
+    public Optional<Product> findById(UUID id) {
+        return productRepository.findById(id);
     }
+
+    @Override
+    public Optional<Product> findProductsByCategoryId(UUID categoryId) {
+       return productRepository.findById(categoryId);
+    }
+
+
 }
