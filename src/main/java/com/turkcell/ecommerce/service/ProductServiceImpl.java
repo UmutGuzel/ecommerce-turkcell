@@ -80,17 +80,15 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<ProductListingDto> getAll(String categoryName, BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock, String sortBy, String sortOrder) {
-        if (categoryName == null) categoryName = ""; // Kategori yoksa boş bir stringle başla
+        if (categoryName == null) categoryName = "";
         if (minPrice == null) minPrice = BigDecimal.ZERO;
         if (maxPrice == null) maxPrice = BigDecimal.valueOf(Integer.MAX_VALUE);
         if (inStock == null) inStock = true;
-        if (sortBy == null) sortBy = "price"; // Varsayılan sıralama fiyat üzerinden
-        if (sortOrder == null) sortOrder = "ASC"; // Varsayılan sıralama artan
+        if (sortBy == null) sortBy = "price";
+        if (sortOrder == null) sortOrder = "ASC";
 
-        // Filtreleme ve sıralama
         List<Product> products = productRepository.findProductsWithFilters(categoryName, minPrice, maxPrice, inStock);
 
-        // Sıralama işlemi
         Comparator<Product> comparator;
         if ("price".equalsIgnoreCase(sortBy)) {
             comparator = Comparator.comparing(Product::getPrice);
@@ -99,7 +97,6 @@ public class ProductServiceImpl implements ProductService{
         } else if ("stock".equalsIgnoreCase(sortBy)) {
             comparator = Comparator.comparing(Product::getStock);
         } else {
-            // Varsayılan sıralama: fiyat
             comparator = Comparator.comparing(Product::getPrice);
         }
 
@@ -109,7 +106,6 @@ public class ProductServiceImpl implements ProductService{
 
         products.sort(comparator);
 
-        // DTO'ya dönüştürme
         return productMapper.toProductListingDto(products);
     }
 
