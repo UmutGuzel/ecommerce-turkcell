@@ -1,10 +1,14 @@
 package com.turkcell.ecommerce.dto.user;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class LoginUserDto {
-    @NotEmpty(message = "Email alanı dolu olmalıdır.")
+    @NotBlank(message = "Email alanı dolu olmalıdır.")
     private String email;
-    @NotEmpty(message = "Şifre alanı dolu olmalıdır.")
+    @NotBlank(message = "Şifre alanı dolu olmalıdır.")
     private String password;
 }

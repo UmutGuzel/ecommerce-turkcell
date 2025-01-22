@@ -26,5 +26,5 @@ public class CreateUserDto {
     @Length(min=8)
     @NotBlank
     private String password;
-    //private List<UUID> roleIds;
+    private List<String> roles;
 }

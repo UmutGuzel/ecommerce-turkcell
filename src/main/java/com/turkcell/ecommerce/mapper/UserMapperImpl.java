@@ -1,42 +1,45 @@
 package com.turkcell.ecommerce.mapper;
 
 import com.turkcell.ecommerce.dto.user.CreateUserDto;
-import com.turkcell.ecommerce.dto.user.UpdateUserDto;
+import com.turkcell.ecommerce.dto.user.ListUserDto;
+import com.turkcell.ecommerce.dto.user.ChangeUserPasswordDto;
+import com.turkcell.ecommerce.entity.Role;
 import com.turkcell.ecommerce.entity.User;
-import com.turkcell.ecommerce.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.sql.Date;
+import java.util.List;
 
 
 @Service
 public class UserMapperImpl implements UserMapper {
-
-
-        private final UserRepository userRepository;
-
-        public UserMapperImpl(UserRepository userRepository) {
-            this.userRepository = userRepository;
-        }
-
-        public User toEntity(CreateUserDto createUserDto) {
+        public User toEntity(CreateUserDto createUserDto, List<Role> roles) {
             User user = new User();
             user.setName(createUserDto.getName());
             user.setSurname(createUserDto.getSurname());
             user.setEmail(createUserDto.getEmail());
             user.setPassword(createUserDto.getPassword());
+            user.setCreatedAt(new Date(System.currentTimeMillis()));
+            user.setUpdatedAt(new Date(System.currentTimeMillis()));
+            user.setRoles(roles);
             return user;
         }
 
-        public User toEntity(UpdateUserDto updateUserDto) {
+        public User toEntity(ChangeUserPasswordDto changeUserPasswordDto) {
             User user = new User();
-            user.setName(updateUserDto.getName());
-            user.setSurname(updateUserDto.getSurname());
-            user.setEmail(updateUserDto.getEmail());
-            user.setPassword(updateUserDto.getPassword());
+            user.setName(changeUserPasswordDto.getName());
+            user.setEmail(changeUserPasswordDto.getEmail());
+            user.setPassword(changeUserPasswordDto.getNewPassword());
             return user;
         }
 
-        // Getter metotları gerekirse eklenebilir
-        public UserRepository getUserRepository() {
-            return userRepository;
+        public List<ListUserDto> toListUserDto(List<User> users) {
+            return users.stream().map(user -> {
+                ListUserDto listUserDto = new ListUserDto();
+                listUserDto.setName(user.getName());
+                listUserDto.setSurname(user.getSurname());
+                listUserDto.setEmail(user.getEmail());
+                return listUserDto;
+            }).toList();
         }
     }

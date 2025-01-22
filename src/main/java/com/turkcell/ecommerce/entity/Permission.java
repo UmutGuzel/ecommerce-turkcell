@@ -1,5 +1,6 @@
 package com.turkcell.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,5 +34,6 @@ public class Permission {
     private Date updatedAt;
 
     @ManyToMany(mappedBy = "permissions")
+    @JsonIgnore
     private List<Role> roles;
 }
