@@ -27,7 +27,7 @@ public class OrderItemServiceImpl implements OrderItemService{
     @Override
     public void add(CreateOrderItemDto createOrderItemDto) {
 
-        Order order=orderService.findById(createOrderItemDto.getOrderId()).orElse(null);
+        Order order=orderService.findById(createOrderItemDto.getOrderId()).orElseThrow(()->new RuntimeException("Sipariş bulunamadı"));
         Product product=productService.findById(createOrderItemDto.getProductId()).orElse(null);
 
 
