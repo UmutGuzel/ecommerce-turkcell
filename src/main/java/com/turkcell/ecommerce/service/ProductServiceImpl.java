@@ -1,6 +1,7 @@
 package com.turkcell.ecommerce.service;
 
 import com.turkcell.ecommerce.dto.product.CreateProductDto;
+import com.turkcell.ecommerce.dto.product.DeleteProductDto;
 import com.turkcell.ecommerce.dto.product.ProductListingDto;
 import com.turkcell.ecommerce.dto.product.UpdateProductDto;
 import com.turkcell.ecommerce.entity.Category;
@@ -32,6 +33,7 @@ public class ProductServiceImpl implements ProductService{
         this.productMapper = productMapper;
     }
 
+    // TODO [LOW]: Hata kontrolleri business rules a yazılacak.
     public void add(CreateProductDto createProductDto) {
         categoryBusinessRules.categoryMustExist(createProductDto.getCategoryId());
 
@@ -51,19 +53,49 @@ public class ProductServiceImpl implements ProductService{
     }
 
     public void update(UpdateProductDto updateProductDto) {
+        Product existingProduct = productRepository.findById(updateProductDto.getId())
+                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
 
+        boolean isDuplicateName = productRepository.existsByNameAndIdNot(updateProductDto.getName(), updateProductDto.getId());
+        if (isDuplicateName) {
+            throw new BusinessException("Aynı isimde başka bir ürün mevcut.");
+        }
+
+        productMapper.updateEntity(updateProductDto, existingProduct);
+        productRepository.save(existingProduct);
+    }
+
+    @Override
+    public void delete(DeleteProductDto deleteProductDto) {
+        Product product = productRepository.findById(deleteProductDto.getId())
+                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
+
+        // TODO [HIGH]: Ürün, siparişlerle ilişikili mi kontrolü düzenlenecek.
+        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
+            throw new BusinessException("Bu ürün, siparişlerle ilişkilendirildiği için silinemez.");
+        }
+
+        productRepository.delete(product);
     }
 
     public List<ProductListingDto> getAll() {
 
-            List<ProductListingDto> productListingDtos = productRepository
-                    .findAll()
-                    .stream()
-                    .map((product) -> new ProductListingDto(product.getId(), product.getName()))
-                    .toList();
+            List<Product> products = productRepository.findAll();
 
-            return productListingDtos;
-
+        return productMapper.toProductListingDto(products);
+//            List<ProductListingDto> productListingDtos = productRepository
+//                    .findAll()
+//                    .stream()
+//                    .map((product) -> new ProductListingDto(
+//                            product.getId(),
+//                            product.getName(),
+//                            product.getPrice(),
+//                            product.getStock(),
+//                            product.getCategory().getName(),
+//                            product.getDescription()))
+//                    .toList();
+//
+//            return productListingDtos;
     }
 
     @Override
