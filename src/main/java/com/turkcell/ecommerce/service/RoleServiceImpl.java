@@ -3,16 +3,30 @@ package com.turkcell.ecommerce.service;
 import com.turkcell.ecommerce.dto.role.CreateRoleDto;
 import com.turkcell.ecommerce.dto.role.ListRoleDto;
 import com.turkcell.ecommerce.dto.role.UpdateRoleDto;
+import com.turkcell.ecommerce.entity.Permission;
+import com.turkcell.ecommerce.entity.Role;
+import com.turkcell.ecommerce.mapper.RoleMapper;
+import com.turkcell.ecommerce.repository.RoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RoleServiceImpl implements RoleService {
+    private final PermissionService permissionService;
+    RoleRepository roleRepository;
+    RoleMapper roleMapper;
+    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper, PermissionService permissionService) {
+        this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
+        this.permissionService = permissionService;
+    }
     @Override
     public void add(CreateRoleDto createRoleDto) {
-
-        //TODO: implement
+        List<Permission> permissions = permissionService.findByIds(createRoleDto.getPermissionIds());
+        Role role = roleMapper.toEntity(createRoleDto, permissions);
+        roleRepository.save(role);
     }
 
     @Override
@@ -23,7 +37,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<ListRoleDto> getAll() {
-        //TODO: implement
-        return List.of();
+        return roleMapper.toListRoleDto(roleRepository.findAll());
+    }
+
+    @Override
+    public List<Role> getRolesByNames(List<String> names) {
+        return roleRepository.findAllByNameIn(names);
     }
 }
