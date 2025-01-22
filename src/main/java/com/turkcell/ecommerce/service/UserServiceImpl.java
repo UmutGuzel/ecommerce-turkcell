@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -69,5 +70,10 @@ public class UserServiceImpl implements UserService{
         userBusinessRules.ValidateUser(optionalUser, loginUserDto);
         return jwtService.generateToken(loginUserDto.getEmail());
 
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return Optional.empty();
     }
 }

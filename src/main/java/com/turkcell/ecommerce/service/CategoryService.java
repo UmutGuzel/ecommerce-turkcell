@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface CategoryService {
     Optional<Category> findById(UUID id);
-    Category createCategory(CreateCategoryDto createCategoryDto);
+    Category createCategory(UUID id,CreateCategoryDto createCategoryDto);
     Category addSubcategory(UUID id,CreateCategoryDto createCategoryDto);
     List<CategoryListiningDto> getAll();
 
