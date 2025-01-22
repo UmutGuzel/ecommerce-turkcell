@@ -39,6 +39,16 @@ public class JwtService {
         return claims.getExpiration().after(new Date());
     }
 
+    public String extractUsername(String token)
+    {
+        Claims claims = Jwts
+                .parser()
+                .verifyWith((SecretKey) getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.getSubject();
+    }
 
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);

@@ -24,12 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository, UserService userService) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
 
@@ -87,13 +89,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category createCategory(UUID id, CreateCategoryDto createCategoryDto) {
-        Optional<User> user = userRepository.findById(id);
-        if (user == null) {
-            throw new IllegalArgumentException("Kullanıcı bulunamadı.");
-        }
+        User user = userService.findById(id).orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
 
-        boolean isAdmin = user.get().getRoles().stream()
-                .anyMatch(role -> role.getName().equals("ADMIN"));
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("admin"));
         if (!isAdmin) {
             throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için admin rolüne sahip olmalısınız.");
         }

@@ -4,7 +4,6 @@ import com.turkcell.ecommerce.dto.user.CreateUserDto;
 import com.turkcell.ecommerce.dto.user.ListUserDto;
 import com.turkcell.ecommerce.dto.user.ChangeUserPasswordDto;
 import com.turkcell.ecommerce.dto.user.LoginUserDto;
-import com.turkcell.ecommerce.dto.user.UpdateUserDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.entity.User;
 
