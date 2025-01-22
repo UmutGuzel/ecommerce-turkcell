@@ -4,8 +4,11 @@ import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.entity.Product;
+import com.turkcell.ecommerce.entity.User;
 import com.turkcell.ecommerce.repository.CategoryRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
+import com.turkcell.ecommerce.repository.UserRepository;
+import com.turkcell.ecommerce.util.exception.result.IllegalArgumentExceptionResult;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
@@ -13,28 +16,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+//TODO:• Admin kullanıcılar yeni kategori ekleyebilmeli.
+
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository) {
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
-    public Category createCategory(@Valid CreateCategoryDto createCategoryDto) {
 
-        Optional<Category> existingCategory=categoryRepository.findByName(createCategoryDto.getName());
-        if(existingCategory.isPresent()) {
-            throw new IllegalArgumentException("Category name already exists");
-        }
-
-        Category category = new Category();
-        category.setName(createCategoryDto.getName());
-        return categoryRepository.save(category);
-    }
 
     @Override
     public Category addSubcategory(UUID id,@Valid CreateCategoryDto createCategoryDto) {
@@ -80,13 +78,35 @@ public class CategoryServiceImpl implements CategoryService {
 
     }
 
-    //
+
 
     @Override
     public Optional<Category> findById(UUID id) {
         return categoryRepository.findById(id);
     }
 
+    @Override
+    public Category createCategory(UUID id, CreateCategoryDto createCategoryDto) {
+        Optional<User> user = userRepository.findById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("Kullanıcı bulunamadı.");
+        }
+
+        boolean isAdmin = user.get().getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+        if (!isAdmin) {
+            throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için admin rolüne sahip olmalısınız.");
+        }
+
+        Optional<Category> existingCategory=categoryRepository.findByName(createCategoryDto.getName());
+        if(existingCategory.isPresent()) {
+            throw new IllegalArgumentException("Category name already exists");
+        }
+
+        Category category = new Category();
+        category.setName(createCategoryDto.getName());
+        return categoryRepository.save(category);
+    }
 
 
 }

@@ -24,10 +24,12 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
-        Category createdCategory = categoryService.createCategory(createCategoryDto); // Kategori oluşturuyor
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory); // 201  ile birlikte döndür
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto,UUID id) {
+        Category createdCategory = categoryService.createCategory(id,createCategoryDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
+
+
 
     @PostMapping("/{parentId}/subcategories")
     public ResponseEntity<Category> addSubcategory(@PathVariable UUID id, @Valid @RequestBody CreateCategoryDto createCategoryDto) {
