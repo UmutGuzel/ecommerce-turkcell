@@ -9,6 +9,8 @@ import com.turkcell.ecommerce.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -35,5 +37,10 @@ public class UserServiceImpl implements UserService{
     public List<ListUserDto> getAll() {
 
         return List.of();
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return Optional.empty();
     }
 }
