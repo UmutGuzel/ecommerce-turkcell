@@ -7,13 +7,13 @@ import com.turkcell.ecommerce.dto.product.UpdateProductDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.mapper.ProductMapper;
-import com.turkcell.ecommerce.mapper.ProductMapperImpl;
 import com.turkcell.ecommerce.repository.ProductRepository;
 import com.turkcell.ecommerce.rules.CategoryBusinessRules;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,24 +78,39 @@ public class ProductServiceImpl implements ProductService{
         productRepository.delete(product);
     }
 
-    public List<ProductListingDto> getAll() {
+    @Override
+    public List<ProductListingDto> getAll(String categoryName, BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock, String sortBy, String sortOrder) {
+        if (categoryName == null) categoryName = ""; // Kategori yoksa boş bir stringle başla
+        if (minPrice == null) minPrice = BigDecimal.ZERO;
+        if (maxPrice == null) maxPrice = BigDecimal.valueOf(Integer.MAX_VALUE);
+        if (inStock == null) inStock = true;
+        if (sortBy == null) sortBy = "price"; // Varsayılan sıralama fiyat üzerinden
+        if (sortOrder == null) sortOrder = "ASC"; // Varsayılan sıralama artan
 
-            List<Product> products = productRepository.findAll();
+        // Filtreleme ve sıralama
+        List<Product> products = productRepository.findProductsWithFilters(categoryName, minPrice, maxPrice, inStock);
 
+        // Sıralama işlemi
+        Comparator<Product> comparator;
+        if ("price".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Product::getPrice);
+        } else if ("name".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Product::getName);
+        } else if ("stock".equalsIgnoreCase(sortBy)) {
+            comparator = Comparator.comparing(Product::getStock);
+        } else {
+            // Varsayılan sıralama: fiyat
+            comparator = Comparator.comparing(Product::getPrice);
+        }
+
+        if ("DESC".equalsIgnoreCase(sortOrder)) {
+            comparator = comparator.reversed();
+        }
+
+        products.sort(comparator);
+
+        // DTO'ya dönüştürme
         return productMapper.toProductListingDto(products);
-//            List<ProductListingDto> productListingDtos = productRepository
-//                    .findAll()
-//                    .stream()
-//                    .map((product) -> new ProductListingDto(
-//                            product.getId(),
-//                            product.getName(),
-//                            product.getPrice(),
-//                            product.getStock(),
-//                            product.getCategory().getName(),
-//                            product.getDescription()))
-//                    .toList();
-//
-//            return productListingDtos;
     }
 
     @Override
