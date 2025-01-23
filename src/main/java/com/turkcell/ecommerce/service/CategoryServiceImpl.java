@@ -103,4 +103,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
 
+    public boolean isCategoryAssociatedWithProducts(UUID categoryId) {
+        return productRepository.existsByCategoryId(categoryId);
+    }
+    public void deleteCategory(UUID categoryId) {
+
+        categoryRepository.deleteById(categoryId);
+    }
+
+
 }
