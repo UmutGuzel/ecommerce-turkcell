@@ -17,8 +17,8 @@ public class OrderStatusMapperImpl implements OrderStatusMapper {
 
     public OrderStatus toEntity(UpdateOrderStatusDto dto) {
         OrderStatus orderStatus = new OrderStatus();
-        orderStatus.setId(dto.getId());
-        orderStatus.setStatus(dto.getStatus());
+        orderStatus.setId(dto.getOrderId());
+        orderStatus.setStatus(dto.getNewStatus());
         return orderStatus;
     }
 
