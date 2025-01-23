@@ -45,6 +45,6 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<CartItem> orderDetails;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<OrderItem> orderItems;
 }

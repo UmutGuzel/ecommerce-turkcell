@@ -1,28 +1,40 @@
 package com.turkcell.ecommerce.service;
 
-import com.turkcell.ecommerce.entity.Cart;
-import com.turkcell.ecommerce.entity.CartItem;
-import com.turkcell.ecommerce.entity.Order;
-import com.turkcell.ecommerce.entity.OrderItem;
-import com.turkcell.ecommerce.repository.OrderItemRepository;
-import com.turkcell.ecommerce.repository.OrderRepository;
+import com.turkcell.ecommerce.dto.order.OrderCreateRequest;
+import com.turkcell.ecommerce.dto.order.OrderResponse;
+import com.turkcell.ecommerce.dto.orderstatus.UpdateOrderStatusDto;
+import com.turkcell.ecommerce.entity.*;
+import com.turkcell.ecommerce.mapper.CartMapper;
+import com.turkcell.ecommerce.mapper.OrderMapper;
+import com.turkcell.ecommerce.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.sql.Date;
+import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
+    private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
+    private final OrderStatusRepository orderStatusRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    private final OrderMapper orderMapper;
+    private final CartMapper cartMapper;
+
+    OrderServiceImpl(OrderRepository orderRepository, CartRepository cartRepository, ProductRepository productRepository, OrderStatusRepository orderStatusRepository, OrderMapper orderMapper, CartMapper cartMapper) {
         this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
+        this.cartRepository = cartRepository;
+        this.productRepository = productRepository;
+        this.orderStatusRepository = orderStatusRepository;
+        this.orderMapper = orderMapper;
+        this.cartMapper = cartMapper;
     }
 
 
@@ -32,32 +44,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(Cart cart) {
-        if (cart == null){
-            throw new RuntimeException("Sepet bulunamadı");
-        }
-        if(cart.getCartItems() == null || cart.getCartItems().isEmpty()){
-            throw new RuntimeException("Sepet boş olamaz");
-        }
+    public OrderResponse createOrder(OrderCreateRequest request) {
+        Cart cart = cartRepository.findById(request.getCartId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        Order order = new Order();
         List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new RuntimeException("Cart is empty");
+        }
 
-        cartItems.stream()
-                .map(cartItem -> {
-                    OrderItem orderItem = new OrderItem();
-                    orderItem.setProduct(cartItem.getProduct());
-                    orderItem.setQuantity(cartItem.getQuantity());
-                    orderItem.setPrice(cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())));
-                    orderItem.setOrder(order);
-                    orderItem.setStatus("Hazırlanıyor");
-                    return orderItem;
-                })
-                .forEach(orderItemRepository::save);
+        // Stok kontrolü (ne olur ne olmaz diye)
+        for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+            if (product.getStock() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + product.getDescription());
+            }
+        }
 
-        order.setCreatedAt(new Date(System.currentTimeMillis()));
+        // Siparişi oluşturma
+        Order order = new Order();
+        order.setCreatedAt((java.sql.Date) new Date());
+        order.setUser(cart.getUser());
+        order.setOrderStatus(orderStatusRepository.findByStatus("Hazırlanıyor")
+                .orElseThrow(() -> new RuntimeException("Default status not found")));
+
+        List<OrderItem> orderItems = cartMapper.toOrderItems(cart, order);
+
+        // Stok güncellemesi
+        for (OrderItem orderItem : orderItems) {
+            Product product = orderItem.getProduct();
+            product.setStock(product.getStock() - orderItem.getQuantity());
+            productRepository.save(product);
+        }
+
+        order.setOrderItems(orderItems);
         orderRepository.save(order);
 
+        // Sepeti temizle (cart itemleri silinirse sepet temizlenmiş olur sanırım :D)
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+
+        return orderMapper.toOrderResponse(order);
     }
 
+    @Override
+    public OrderResponse getOrderById(UUID orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    public List<OrderResponse> getUserOrders(UUID userId) {
+        List<Order> orders = orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+        return orders.stream().map(orderMapper::toOrderResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderResponse updateOrderStatus(UpdateOrderStatusDto request) {
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        OrderStatus orderStatus = orderStatusRepository.findByStatus(request.getNewStatus())
+                .orElseThrow(() -> new RuntimeException("Invalid status"));
+
+        order.setOrderStatus(orderStatus);
+        order.setUpdatedAt((java.sql.Date) new Date());
+        orderRepository.save(order);
+
+        return orderMapper.toOrderResponse(order);
+    }
 }
