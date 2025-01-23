@@ -23,14 +23,11 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // Yeni bir kategori oluşturma
     @PostMapping
     public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
         Category createdCategory = categoryService.createCategory(createCategoryDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
-
-    // Alt kategori ekleme
     @PostMapping("/{parentId}/subcategories")
     public ResponseEntity<Category> addSubcategory(
             @PathVariable UUID parentId,
@@ -54,6 +51,18 @@ public class CategoryController {
     @GetMapping("/{parentId}/subcategories")
     public Optional<Category> getSubcategories(@PathVariable UUID parentId) {
         return categoryService.getSubcategoriesByParentId(parentId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
+        if (categoryService.isCategoryAssociatedWithProducts(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Kategori, ürünlerle ilişkilendirildiği için silinemez.");
+        }
+
+        // Kategoriyi siliyorum
+        categoryService.deleteCategory(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 
