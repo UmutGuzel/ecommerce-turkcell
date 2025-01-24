@@ -1,8 +1,9 @@
 package com.turkcell.ecommerce.controller;
 
-import com.turkcell.ecommerce.dto.cart.CartListingDto;
+import com.turkcell.ecommerce.dto.cart.CartDto;
 import com.turkcell.ecommerce.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,36 +12,32 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/cart")
 public class CartController {
-    private final CartService cartService;
-
     @Autowired
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
+    private CartService cartService;
+
+    @GetMapping("{userId}/cart/{cartId}")
+    public ResponseEntity<CartDto> getCartByUserId(@PathVariable UUID userId, @PathVariable UUID cartId) {
+        CartDto cartDto = cartService.getCart(userId, cartId);
+
+        return new ResponseEntity<CartDto>(cartDto, HttpStatus.FOUND);
     }
 
-    @PostMapping("/add")
-    public void addProductToCart(
-            @RequestParam UUID userId, @RequestParam UUID productId, @RequestParam int quantity) {
-        cartService.addProductToCart(userId, productId, quantity);
+    @PutMapping("{cartId}/products/{productId}/quantity/{quantity}")
+    public ResponseEntity<String> updateCartProduct(@PathVariable UUID cartId, @PathVariable UUID productId, @PathVariable Integer quantity) {
+        this.cartService.updateProductQuantityInCart(cartId, productId, quantity);
+        return ResponseEntity.ok("Ürün miktarı başarıyla güncellendi.");
     }
 
-    @DeleteMapping("/remove")
-    public void removeProductFromCart(@RequestParam UUID userId,
-                                                      @RequestParam UUID productId) {
-        cartService.removeProductFromCart(userId, productId);
+    @PostMapping("{cartId}/products/{productId}/quantity/{quantity}")
+    public ResponseEntity<String> addProductToCart(@PathVariable UUID cartId, @PathVariable UUID productId, @PathVariable Integer quantity) {
+        this.cartService.addProductToCart(cartId, productId, quantity);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Ürün başarıyla sepete eklendi.");
     }
 
-    @GetMapping("/view")
-    public ResponseEntity<CartListingDto> viewCart(@RequestParam UUID userId) {
-        CartListingDto cartListingDto = cartService.getCartItems(userId);
-        return ResponseEntity.ok(cartListingDto);
-    }
+    @DeleteMapping("{cartId}/product/{productId}")
+    public ResponseEntity<String> deleteProductFromCart(@PathVariable UUID cartId, @PathVariable UUID productId) {
+        String status = cartService.deleteProductFromCart(cartId, productId);
 
-    @PutMapping("/updateQuantity/{userId}/{productId}")
-    public ResponseEntity<Void> updateQuantity(@PathVariable UUID userId,
-                                               @PathVariable UUID productId,
-                                               @RequestParam int quantity) {
-        cartService.updateProductQuantity(userId, productId, quantity);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<String>(status, HttpStatus.OK);
     }
 }

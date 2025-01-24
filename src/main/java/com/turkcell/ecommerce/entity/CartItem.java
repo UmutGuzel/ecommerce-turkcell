@@ -23,8 +23,9 @@ public class CartItem {
     @Column(name="id")
     private UUID id;
 
-    @Column(name="price")
-    private BigDecimal price;
+    @Column(name="product_price")
+    private BigDecimal productPrice;
+
     @Column(name="quantity")
     private Integer quantity;
 
@@ -36,8 +37,8 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
-
 }

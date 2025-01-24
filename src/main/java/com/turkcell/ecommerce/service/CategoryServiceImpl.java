@@ -3,13 +3,10 @@ package com.turkcell.ecommerce.service;
 import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
-import com.turkcell.ecommerce.entity.Product;
-import com.turkcell.ecommerce.entity.User;
 import com.turkcell.ecommerce.repository.CategoryRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
-import com.turkcell.ecommerce.repository.UserRepository;
-import com.turkcell.ecommerce.util.exception.result.IllegalArgumentExceptionResult;
 import jakarta.validation.Valid;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,37 +20,18 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-    private final UserService userService;
+    private final CategoryService categoryService;
 
 
-    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository, UserRepository userRepository, UserService userService) {
+
+    public CategoryServiceImpl(@Lazy  CategoryRepository categoryRepository,@Lazy ProductRepository productRepository, @Lazy CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
+        this.categoryService = categoryService;
     }
 
 
 
-    @Override
-    public Category addSubcategory(UUID id,@Valid CreateCategoryDto createCategoryDto) {
-
-        Category parentCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid parent category ID."));
-
-        Optional<Category> existingCategory = categoryRepository.findByName(createCategoryDto.getName());
-        if (existingCategory.isPresent()) {
-            throw new IllegalArgumentException("This Subcategory name already exists.");
-        }
-
-        Category subCategory = new Category();
-        subCategory.setName(createCategoryDto.getName());
-        subCategory.setParent(parentCategory); //üst kategoriye bağlıyorum
-
-        parentCategory.getSubCategories().add(subCategory);
-        return categoryRepository.save(parentCategory); //ana kategoriyi güncelle
-    }
 
     @Override
     public List<CategoryListiningDto> getAll() {
@@ -66,20 +44,20 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryListiningDtos;
     }
 
-
-    public void deleteCategory(UUID id) {
-            Category category = categoryRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Silinecek kategori bulunamadı."));
-
-        Optional<Product> products = productRepository.findById(id);
-        if (!products.isEmpty()) {
-            throw new IllegalArgumentException("Bu kategori, ürünlerle ilişkilendirilmiş olduğundan silinemez.");
-        }
-        categoryRepository.delete(category);
+    @Override
+    public  List<CategoryListiningDto> getAllCategories() {
+        return categoryService.getAll();    }
 
 
+    @Override
+    public List<CategoryListiningDto> getCategoryById() {
+        return categoryService.getAll();
     }
 
+    @Override
+    public Optional<Category> getSubcategoriesByParentId(UUID parentId) {
+        return categoryRepository.findById(parentId);
+    }
 
 
     @Override
@@ -87,24 +65,50 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(id);
     }
 
-    @Override
-    public Category createCategory(UUID id, CreateCategoryDto createCategoryDto) {
-        User user = userService.findById(id).orElseThrow(() -> new IllegalArgumentException("Kullanıcı bulunamadı."));
 
-        boolean isAdmin = user.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("admin"));
-        if (!isAdmin) {
-            throw new IllegalArgumentException("Bu işlemi gerçekleştirmek için admin rolüne sahip olmalısınız.");
-        }
 
-        Optional<Category> existingCategory=categoryRepository.findByName(createCategoryDto.getName());
-        if(existingCategory.isPresent()) {
-            throw new IllegalArgumentException("Category name already exists");
+
+    public Boolean isCategoryNameExists(String name) {
+        return categoryRepository.findByName(name).isPresent(); // Kategori adı varsa true döner
+    }
+
+
+
+    public Category createCategory(@Valid CreateCategoryDto createCategoryDto) {
+
+
+        if (isCategoryNameExists(createCategoryDto.getName())) {
+            throw new IllegalArgumentException("Bu kategori adı zaten mevcut.");
         }
 
         Category category = new Category();
         category.setName(createCategoryDto.getName());
         return categoryRepository.save(category);
+    }
+
+
+    public Category addSubcategory(UUID ıd, @Valid CreateCategoryDto createCategoryDto) {
+
+        Category parentCategory = categoryRepository.findById(ıd)
+                .orElseThrow(() -> new IllegalArgumentException("Üst kategori bulunamadı."));
+
+
+        Category subcategory = new Category();
+        subcategory.setName(createCategoryDto.getName());
+        subcategory.setParentCategory(parentCategory); // Üst kategoriye bağladım
+
+
+        parentCategory.getLinkedCategory().add(subcategory);
+        return categoryRepository.save(parentCategory); // Üst kategoriyi güncelledim
+    }
+
+
+    public boolean isCategoryAssociatedWithProducts(UUID categoryId) {
+        return productRepository.existsByCategoryId(categoryId);
+    }
+    public void deleteCategory(UUID categoryId) {
+
+        categoryRepository.deleteById(categoryId);
     }
 
 
