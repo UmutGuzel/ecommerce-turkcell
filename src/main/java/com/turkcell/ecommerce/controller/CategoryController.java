@@ -24,22 +24,46 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto, UUID id) {
-        Category createdCategory = categoryService.createCategory(id,createCategoryDto);
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
+        Category createdCategory = categoryService.createCategory(createCategoryDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
-
-
-
     @PostMapping("/{parentId}/subcategories")
-    public ResponseEntity<Category> addSubcategory(@PathVariable UUID id, @Valid @RequestBody CreateCategoryDto createCategoryDto) {
-        Category createdSubcategory = categoryService.addSubcategory(id, createCategoryDto); // Alt kategori ekle
+    public ResponseEntity<Category> addSubcategory(
+            @PathVariable UUID parentId,
+            @Valid @RequestBody CreateCategoryDto createCategoryDto) {
+        Category createdSubcategory = categoryService.addSubcategory(parentId, createCategoryDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSubcategory);
     }
 
+
+
     @GetMapping
-    public List<CategoryListiningDto> getAll() {
-        return this.categoryService.getAll();
+    public  List<CategoryListiningDto> getAllCategories() {
+        return this.categoryService.getAllCategories();
     }
+
+    @GetMapping("/{id}")
+    public List<CategoryListiningDto> getCategoryById(@PathVariable UUID id) {
+        return this.categoryService.getCategoryById();
+    }
+
+    @GetMapping("/{parentId}/subcategories")
+    public Optional<Category> getSubcategories(@PathVariable UUID parentId) {
+        return categoryService.getSubcategoriesByParentId(parentId);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
+        if (categoryService.isCategoryAssociatedWithProducts(id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Kategori, ürünlerle ilişkilendirildiği için silinemez.");
+        }
+
+        // Kategoriyi siliyorum
+        categoryService.deleteCategory(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 
 }

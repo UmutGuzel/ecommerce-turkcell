@@ -1,5 +1,6 @@
 package com.turkcell.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,10 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -36,14 +34,14 @@ public class Category {
     private List<Product> products;
 
 
-    //alt kategori
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Category parent;
+    @JsonBackReference
+    @ManyToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name="parentCategory")
+    private Category parentCategory;
 
 
-    //üst kategori
-    @OneToMany(mappedBy = "parent",cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Category> subCategories=new ArrayList<>();
+
+    @OneToMany(mappedBy="parentCategory")
+    private Set<Category> linkedCategory = new HashSet<Category>();
 
 }

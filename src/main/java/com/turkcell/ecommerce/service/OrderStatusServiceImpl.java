@@ -33,10 +33,10 @@ public class OrderStatusServiceImpl implements OrderStatusService {
 
     @Override
     public void update(UpdateOrderStatusDto dto) {
-        OrderStatus status = orderStatusRepository.findById(dto.getId()).orElse(null);
+        OrderStatus status = orderStatusRepository.findById(dto.getOrderId()).orElse(null);
 
         if(status!=null){
-            status.setStatus(dto.getStatus());
+            status.setStatus(dto.getNewStatus());
             status.setUpdatedAt(new Date(System.currentTimeMillis()));
             orderStatusRepository.save(status);
         }
