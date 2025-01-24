@@ -33,23 +33,35 @@ public class ProductController {
     }
 
     @PutMapping
-    public void update(@RequestBody @Valid UpdateProductDto updateProductDto) {
+    public ResponseEntity<String> update(@RequestBody @Valid UpdateProductDto updateProductDto) {
         this.productService.update(updateProductDto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Ürün başarıyla güncellendi.");
     }
 
     @DeleteMapping
-    public void delete(@RequestBody @Valid DeleteProductDto deleteProductDto) {
+    public ResponseEntity<String> delete(@RequestBody @Valid DeleteProductDto deleteProductDto) {
         this.productService.delete(deleteProductDto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Ürün başarıyla silindi.");
     }
 
     @GetMapping()
-    public List<ProductListingDto> getAll(
+    public ResponseEntity<List<ProductListingDto>> getAll(
             @RequestParam(required = false) String categoryName,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Boolean inStock,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortOrder) {
-        return productService.getAll(categoryName, minPrice, maxPrice, inStock, sortBy, sortOrder);
+        List<ProductListingDto> products = productService.getAll(categoryName, minPrice, maxPrice, inStock, sortBy, sortOrder);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(products);
     }
 }

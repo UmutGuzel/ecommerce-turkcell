@@ -1,6 +1,5 @@
 package com.turkcell.ecommerce.dto.cart;
 
-import com.turkcell.ecommerce.dto.product.ProductDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +12,6 @@ import java.util.UUID;
 @Setter
 public class CartDto {
     private UUID id;
-    private BigDecimal totalPrice = new BigDecimal("0.0");
-    private List<ProductDto> products = new ArrayList<>();
+    private BigDecimal totalPrice = BigDecimal.ZERO;
+    private List<CartProductListingDto> products = new ArrayList<>();
 }

@@ -10,8 +10,6 @@ public interface CartService {
 
     CartDto getCart(UUID userId, UUID cartId);
 
-    void updateProductInCart(UUID cartId, UUID productId);
-
     CartDto updateProductQuantityInCart(UUID cartId, UUID productId, Integer quantity);
 
     String deleteProductFromCart(UUID cartId, UUID productId);

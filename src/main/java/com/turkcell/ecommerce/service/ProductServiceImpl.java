@@ -9,11 +9,10 @@ import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.mapper.ProductMapper;
 import com.turkcell.ecommerce.repository.ProductRepository;
 import com.turkcell.ecommerce.rules.CategoryBusinessRules;
-import com.turkcell.ecommerce.util.exception.type.BusinessException;
+import com.turkcell.ecommerce.rules.ProductBusinessRules;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,15 +24,16 @@ public class ProductServiceImpl implements ProductService{
     private final CategoryService categoryService;
     private final CategoryBusinessRules categoryBusinessRules;
     private final ProductMapper productMapper;
+    private final ProductBusinessRules productBusinessRules;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService, CategoryBusinessRules categoryBusinessRules, ProductMapper productMapper) {
+    public ProductServiceImpl(ProductRepository productRepository, CategoryService categoryService, CategoryBusinessRules categoryBusinessRules, ProductMapper productMapper, ProductBusinessRules productBusinessRules) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.categoryBusinessRules = categoryBusinessRules;
         this.productMapper = productMapper;
+        this.productBusinessRules = productBusinessRules;
     }
 
-    // TODO [LOW]: Hata kontrolleri business rules a yazılacak.
     public void add(CreateProductDto createProductDto) {
         categoryBusinessRules.categoryMustExist(createProductDto.getCategoryId());
 
@@ -41,25 +41,16 @@ public class ProductServiceImpl implements ProductService{
                 .findById(createProductDto.getCategoryId())
                 .orElse(null);
 
-        Product productWithSameName = productRepository
-                .findByName(createProductDto.getName())
-                .orElse(null);
-
-        if(productWithSameName != null)
-            throw new BusinessException("Product already exists");
+        productBusinessRules.checkIfProductNameExists(createProductDto.getName());
 
         Product product = productMapper.toEntity(createProductDto, category);
         productRepository.save(product);
     }
 
     public void update(UpdateProductDto updateProductDto) {
-        Product existingProduct = productRepository.findById(updateProductDto.getId())
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
+        Product existingProduct = productBusinessRules.checkIfProductExists(updateProductDto.getId());
 
-        boolean isDuplicateName = productRepository.existsByNameAndIdNot(updateProductDto.getName(), updateProductDto.getId());
-        if (isDuplicateName) {
-            throw new BusinessException("Aynı isimde başka bir ürün mevcut.");
-        }
+        productBusinessRules.checkIfProductNameExists(updateProductDto.getName(), updateProductDto.getId());
 
         productMapper.updateEntity(updateProductDto, existingProduct);
         productRepository.save(existingProduct);
@@ -67,13 +58,8 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public void delete(DeleteProductDto deleteProductDto) {
-        Product product = productRepository.findById(deleteProductDto.getId())
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
-
-        // TODO [HIGH]: Ürün, siparişlerle ilişikili mi kontrolü düzenlenecek.
-        if (product.getOrderItems() != null && !product.getOrderItems().isEmpty()) {
-            throw new BusinessException("Bu ürün, siparişlerle ilişkilendirildiği için silinemez.");
-        }
+        Product product = productBusinessRules.checkIfProductExists(deleteProductDto.getId());
+        productBusinessRules.checkIfProductIsInOrder(product);
 
         productRepository.delete(product);
     }
@@ -89,29 +75,14 @@ public class ProductServiceImpl implements ProductService{
 
         List<Product> products = productRepository.findProductsWithFilters(categoryName, minPrice, maxPrice, inStock);
 
-        Comparator<Product> comparator;
-        if ("price".equalsIgnoreCase(sortBy)) {
-            comparator = Comparator.comparing(Product::getPrice);
-        } else if ("name".equalsIgnoreCase(sortBy)) {
-            comparator = Comparator.comparing(Product::getName);
-        } else if ("stock".equalsIgnoreCase(sortBy)) {
-            comparator = Comparator.comparing(Product::getStock);
-        } else {
-            comparator = Comparator.comparing(Product::getPrice);
-        }
-
-        if ("DESC".equalsIgnoreCase(sortOrder)) {
-            comparator = comparator.reversed();
-        }
-
-        products.sort(comparator);
+        products = productBusinessRules.sortProducts(products, sortBy, sortOrder);
 
         return productMapper.toProductListingDto(products);
     }
 
     @Override
     public Optional<Product> findById(UUID id) {
-        return Optional.empty();
+        return productRepository.findById(id);
     }
 
     @Override

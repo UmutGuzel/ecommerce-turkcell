@@ -1,13 +1,14 @@
 package com.turkcell.ecommerce.service;
 
 import com.turkcell.ecommerce.dto.cart.CartDto;
-import com.turkcell.ecommerce.dto.product.ProductDto;
+import com.turkcell.ecommerce.dto.cart.CartProductListingDto;
 import com.turkcell.ecommerce.entity.Cart;
 import com.turkcell.ecommerce.entity.CartItem;
 import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.repository.CartItemRepository;
 import com.turkcell.ecommerce.repository.CartRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
+import com.turkcell.ecommerce.rules.CartBusinessRules;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,10 @@ public class CartServiceImpl implements CartService {
     private CartRepository cartRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private CartItemRepository cartItemRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
+    private CartBusinessRules cartBusinessRules;
 
     private final ModelMapper modelMapper;
 
@@ -38,26 +39,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDto addProductToCart(UUID cartId, UUID productId, Integer quantity) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
+        Cart cart = cartBusinessRules.cartMustExist(cartId);
+        Product product = cartBusinessRules.productMustExist(productId);
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
-
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-
-        if (cartItem != null) {
-            throw new BusinessException(product.getName() + " sepette mevcut.");
-        }
-
-        if (product.getStock() == 0) {
-            throw new BusinessException(product.getName() + " stok durumundan dolayı sepete eklenemiyor.");
-        }
-
-        if (product.getStock() < quantity) {
-            throw new BusinessException("Stok durumundan dolayı" + product.getName()
-                    + " ürününden" + product.getStock() + " adetten fazla alamazsınız.");
-        }
+        cartBusinessRules.checkIfCartItemExists(cartId, productId, product.getName());
+        cartBusinessRules.checkIfProductInStock(product);
+        cartBusinessRules.checkIfQuantityExceedsStock(product, quantity);
 
         CartItem newCartItem = new CartItem();
 
@@ -70,12 +57,14 @@ public class CartServiceImpl implements CartService {
 
         cart.setTotalPrice(cart.getTotalPrice().add(product.getPrice().multiply(BigDecimal.valueOf(quantity))));
 
+        cartRepository.save(cart);
+
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> productDtos = cart.getCartItems().stream()
-                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+        List<CartProductListingDto> products = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), CartProductListingDto.class)).toList();
 
-        cartDTO.setProducts(productDtos);
+        cartDTO.setProducts(products);
 
         return cartDTO;
     }
@@ -83,19 +72,23 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartDto getCart(UUID userId, UUID cartId) {
         Cart cart = cartRepository.findCartByUserIdAndCartId(userId, cartId);
-
-        if (cart == null) {
-            throw new BusinessException("Sepet bulunamadı.");
-        }
+        cartBusinessRules.checkIfCartExists(cart);
 
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> products = cart.getCartItems().stream()
+        List<CartProductListingDto> products = cart.getCartItems().stream()
                 .map(cartItem -> {
-                    if (cartItem.getProduct() == null) {
-                        throw new BusinessException("Sepette ürün bilgisi eksik.");
-                    }
-                    return modelMapper.map(cartItem.getProduct(), ProductDto.class);
+                    cartBusinessRules.checkIfProductInfoExists(cartItem);
+
+                    CartProductListingDto productDto = modelMapper.map(cartItem.getProduct(), CartProductListingDto.class);
+                    productDto.setQuantity(cartItem.getQuantity());
+
+                    BigDecimal unitPrice = cartItem.getProductPrice();
+                    productDto.setUnitPrice(unitPrice);
+
+                    BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+                    productDto.setPrice(totalPrice);
+                    return productDto;
                 })
                 .collect(Collectors.toList());
 
@@ -105,54 +98,15 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void updateProductInCart(UUID cartId, UUID productId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
-
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-
-        if (cartItem == null) {
-            throw new BusinessException("Ürün " + product.getName() + " sepette bulunmamaktadır.");
-        }
-
-        BigDecimal productTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-
-        BigDecimal cartPrice = cart.getTotalPrice().subtract(productTotalPrice);
-
-        cartItem.setProductPrice(product.getPrice());
-
-        BigDecimal updatedProductTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-        cart.setTotalPrice(cartPrice.add(updatedProductTotalPrice));
-
-
-        cartItem = cartItemRepository.save(cartItem);
-    }
-
-    @Override
     public CartDto updateProductQuantityInCart(UUID cartId, UUID productId, Integer quantity) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
+        cartBusinessRules.checkUpdateQuantityIsValid(quantity);
+        Cart cart = cartBusinessRules.cartMustExist(cartId);
+        Product product = cartBusinessRules.productMustExist(productId);
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
+        cartBusinessRules.checkIfProductInStock(product);
+        cartBusinessRules.checkIfQuantityExceedsStock(product, quantity);
 
-        if (product.getStock() == 0) {
-            throw new BusinessException(product.getName() + " stok durumundan dolayı sepete eklenemiyor.");
-        }
-
-        if (product.getStock() < quantity) {
-            throw new BusinessException("Stok durumundan dolayı" + product.getName()
-                    + " ürününden" + product.getStock() + " adetten fazla alamazsınız.");
-        }
-
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-
-        if (cartItem == null) {
-            throw new BusinessException("Ürün " + product.getName() + " sepette bulunmamaktadır.");
-        }
+        CartItem cartItem = cartBusinessRules.checkCartItemExists(cartId, productId);
 
         BigDecimal currentProductTotalPrice = cartItem.getProductPrice()
                 .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
@@ -169,10 +123,10 @@ public class CartServiceImpl implements CartService {
 
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> productDtos = cart.getCartItems().stream()
-                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+        List<CartProductListingDto> products = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), CartProductListingDto.class)).toList();
 
-        cartDTO.setProducts(productDtos);
+        cartDTO.setProducts(products);
 
         return cartDTO;
     }
@@ -180,14 +134,9 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public String deleteProductFromCart(UUID cartId, UUID productId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
+        Cart cart = cartBusinessRules.cartMustExist(cartId);
 
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-
-        if (cartItem == null) {
-            throw new BusinessException("Sepette belirtilen ürün bulunamadı.");
-        }
+        CartItem cartItem = cartBusinessRules.checkCartItemExists(cartId, productId);
 
         BigDecimal productTotalPrice = cartItem.getProductPrice()
                 .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
