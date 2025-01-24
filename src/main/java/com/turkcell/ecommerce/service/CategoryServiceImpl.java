@@ -103,11 +103,11 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryDto categoryDto = new CategoryDto();
         categoryDto.setId(category.getId());
         categoryDto.setName(category.getName());
-        categoryDto.setSubCategories(
-                category.getLinkedCategory().stream()
-                        .map(subCategory -> new CategoryDto(subCategory.getId(), subCategory.getName()))
-                        .toList()
-        );
+//        categoryDto.setSubCategories(
+//                category.getLinkedCategory().stream()
+//                        .map(subCategory -> new CategoryDto(subCategory.getId(), subCategory.getName()))
+//                        .toList()
+//        );
 
         return categoryDto;
     }
