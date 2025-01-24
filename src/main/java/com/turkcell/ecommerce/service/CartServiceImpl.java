@@ -1,7 +1,7 @@
 package com.turkcell.ecommerce.service;
 
 import com.turkcell.ecommerce.dto.cart.CartDto;
-import com.turkcell.ecommerce.dto.product.ProductDto;
+import com.turkcell.ecommerce.dto.cart.CartProductListingDto;
 import com.turkcell.ecommerce.entity.Cart;
 import com.turkcell.ecommerce.entity.CartItem;
 import com.turkcell.ecommerce.entity.Product;
@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
 
         if (product.getStock() < quantity) {
             throw new BusinessException("Stok durumundan dolayı" + product.getName()
-                    + " ürününden" + product.getStock() + " adetten fazla alamazsınız.");
+                    + " ürününden " + product.getStock() + " adetten fazla alamazsınız.");
         }
 
         CartItem newCartItem = new CartItem();
@@ -70,12 +70,14 @@ public class CartServiceImpl implements CartService {
 
         cart.setTotalPrice(cart.getTotalPrice().add(product.getPrice().multiply(BigDecimal.valueOf(quantity))));
 
+        cartRepository.save(cart);
+
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> productDtos = cart.getCartItems().stream()
-                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+        List<CartProductListingDto> products = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), CartProductListingDto.class)).toList();
 
-        cartDTO.setProducts(productDtos);
+        cartDTO.setProducts(products);
 
         return cartDTO;
     }
@@ -90,45 +92,26 @@ public class CartServiceImpl implements CartService {
 
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> products = cart.getCartItems().stream()
+        List<CartProductListingDto> products = cart.getCartItems().stream()
                 .map(cartItem -> {
                     if (cartItem.getProduct() == null) {
                         throw new BusinessException("Sepette ürün bilgisi eksik.");
                     }
-                    return modelMapper.map(cartItem.getProduct(), ProductDto.class);
+                    CartProductListingDto productDto = modelMapper.map(cartItem.getProduct(), CartProductListingDto.class);
+                    productDto.setQuantity(cartItem.getQuantity());
+
+                    BigDecimal unitPrice = cartItem.getProductPrice();
+                    productDto.setUnitPrice(unitPrice);
+
+                    BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+                    productDto.setPrice(totalPrice);
+                    return productDto;
                 })
                 .collect(Collectors.toList());
 
         cartDTO.setProducts(products);
 
         return cartDTO;
-    }
-
-    @Override
-    public void updateProductInCart(UUID cartId, UUID productId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
-
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
-
-        if (cartItem == null) {
-            throw new BusinessException("Ürün " + product.getName() + " sepette bulunmamaktadır.");
-        }
-
-        BigDecimal productTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-
-        BigDecimal cartPrice = cart.getTotalPrice().subtract(productTotalPrice);
-
-        cartItem.setProductPrice(product.getPrice());
-
-        BigDecimal updatedProductTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
-        cart.setTotalPrice(cartPrice.add(updatedProductTotalPrice));
-
-
-        cartItem = cartItemRepository.save(cartItem);
     }
 
     @Override
@@ -169,10 +152,10 @@ public class CartServiceImpl implements CartService {
 
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        List<ProductDto> productDtos = cart.getCartItems().stream()
-                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+        List<CartProductListingDto> products = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), CartProductListingDto.class)).toList();
 
-        cartDTO.setProducts(productDtos);
+        cartDTO.setProducts(products);
 
         return cartDTO;
     }

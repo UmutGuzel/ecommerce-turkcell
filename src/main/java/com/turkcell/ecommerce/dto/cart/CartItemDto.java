@@ -1,6 +1,5 @@
 package com.turkcell.ecommerce.dto.cart;
 
-import com.turkcell.ecommerce.dto.product.ProductDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +12,6 @@ public class CartItemDto {
     private UUID id;
     private BigDecimal productPrice;
     private Integer quantity;
-    private ProductDto product;
+    private CartProductListingDto product;
     private CartDto cart;
 }

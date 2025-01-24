@@ -1,4 +1,4 @@
-package com.turkcell.ecommerce.dto.product;
+package com.turkcell.ecommerce.dto.cart;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,11 +8,12 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ProductDto {
+public class CartProductListingDto {
     private UUID id;
     private String name;
     private String description;
+    private Integer quantity;
+    private BigDecimal unitPrice;
     private BigDecimal price;
-    private Integer stock;
     private String image;
 }
