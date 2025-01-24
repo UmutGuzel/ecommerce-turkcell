@@ -4,6 +4,9 @@ import com.turkcell.ecommerce.util.exception.result.BusinessExceptionResult;
 import com.turkcell.ecommerce.util.exception.result.GeneralExceptionResult;
 import com.turkcell.ecommerce.util.exception.result.ValidationExceptionResult;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,4 +37,17 @@ public class GlobalExceptionHandler {
                 .map((error) -> error.getDefaultMessage())
                 .toList());
     }
+
+    @ExceptionHandler({JwtException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public GeneralExceptionResult handleExpiredJwtException(ExpiredJwtException e) {
+        return new GeneralExceptionResult("JwtException");
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public GeneralExceptionResult handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        return new GeneralExceptionResult("DataIntegrityViolationException");
+    }
+
 }

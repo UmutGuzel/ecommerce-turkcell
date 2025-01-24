@@ -3,6 +3,7 @@ package com.turkcell.ecommerce.util.security;
 import io.jsonwebtoken.Jwt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,7 +22,16 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
-                    .requestMatchers("/").authenticated().anyRequest().permitAll())
+//                    .requestMatchers("/api/v1/user/login", "/api/v1/user/register").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/user/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
+//                    .requestMatchers(HttpMethod., "/api/v1//**").hasAnyAuthority("admin", "user")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyAuthority("admin")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyAuthority("admin")
+                    .requestMatchers("/api/v1/**").hasAnyAuthority("admin", "user", "seller")
+//                    .requestMatchers("/**").authenticated()
+                    .anyRequest().permitAll()
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }

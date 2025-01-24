@@ -23,7 +23,7 @@ public class UserController {
         return userService.getAll();
     }
 
-   @PostMapping
+   @PostMapping("/register")
     public void add(@RequestBody @Valid CreateUserDto createUserDto) {
         userService.add(createUserDto);
     }

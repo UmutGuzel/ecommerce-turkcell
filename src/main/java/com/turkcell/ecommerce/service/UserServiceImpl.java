@@ -10,13 +10,13 @@ import com.turkcell.ecommerce.mapper.UserMapper;
 import com.turkcell.ecommerce.repository.UserRepository;
 import com.turkcell.ecommerce.rules.UserBusinessRules;
 import com.turkcell.ecommerce.util.jwt.JwtService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService{
@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService{
        userBusinessRules.ValidateUser(optionalUser);
 
        List<Role> roles = roleService.getRolesByNames(createUserDto.getRoles());
+       if(!roles.isEmpty())
+           userBusinessRules.ValidateRoles(roles);
+
        createUserDto.setPassword(bCryptPasswordEncoder.encode(createUserDto.getPassword()));
        User user = userMapper.toEntity(createUserDto, roles);
 
@@ -60,6 +63,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<ListUserDto> getAll() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
         List<User> users = userRepository.findAll();
         return userMapper.toListUserDto(users);
     }
@@ -68,7 +73,10 @@ public class UserServiceImpl implements UserService{
     public String login(LoginUserDto loginUserDto) {
         Optional<User> optionalUser = userRepository.findByEmail(loginUserDto.getEmail());
         userBusinessRules.ValidateUser(optionalUser, loginUserDto);
-        return jwtService.generateToken(loginUserDto.getEmail());
+        User user = optionalUser.get();
+        Map<String,Object> roles = new HashMap<>();
+        roles.put("roles", user.getRoles().stream().map(c->c.getName()).toList());
+        return jwtService.generateToken(user.getEmail(), roles);
 
     }
 
