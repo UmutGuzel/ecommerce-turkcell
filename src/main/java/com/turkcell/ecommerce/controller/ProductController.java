@@ -7,6 +7,8 @@ import com.turkcell.ecommerce.dto.product.UpdateProductDto;
 import com.turkcell.ecommerce.service.ProductService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -22,8 +24,12 @@ public class ProductController {
     }
 
     @PostMapping
-    public void add(@RequestBody @Valid CreateProductDto createProductDto) {
+    public ResponseEntity<String> add(@RequestBody @Valid CreateProductDto createProductDto) {
         this.productService.add(createProductDto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("Ürün başarıyla eklendi.");
     }
 
     @PutMapping
@@ -31,8 +37,8 @@ public class ProductController {
         this.productService.update(updateProductDto);
     }
 
-    @DeleteMapping("{id}")
-    public void delete(@PathVariable DeleteProductDto deleteProductDto) {
+    @DeleteMapping
+    public void delete(@RequestBody @Valid DeleteProductDto deleteProductDto) {
         this.productService.delete(deleteProductDto);
     }
 
