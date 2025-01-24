@@ -10,5 +10,4 @@ import java.util.UUID;
 @Setter
 public class CreateRoleDto {
     private String name;
-    private List<String> permissions;
 }

@@ -8,7 +8,9 @@ import java.util.UUID;
 public interface CartService {
     CartDto addProductToCart(UUID cartId, UUID productId, Integer quantity);
 
-    CartDto getCart(UUID userId, UUID cartId);
+    CartDto getCart(UUID userId);
+
+    CartDto createCart(UUID userId);
 
     CartDto updateProductQuantityInCart(UUID cartId, UUID productId, Integer quantity);
 

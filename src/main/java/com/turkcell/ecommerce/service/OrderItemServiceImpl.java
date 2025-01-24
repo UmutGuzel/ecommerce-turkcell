@@ -7,6 +7,7 @@ import com.turkcell.ecommerce.entity.Order;
 import com.turkcell.ecommerce.entity.OrderItem;
 import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.repository.OrderItemRepository;
+import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class OrderItemServiceImpl implements OrderItemService{
     @Override
     public void add(CreateOrderItemDto createOrderItemDto) {
 
-        Order order=orderService.findById(createOrderItemDto.getOrderId()).orElseThrow(()->new RuntimeException("Sipariş bulunamadı"));
+        Order order=orderService.findById(createOrderItemDto.getOrderId()).orElseThrow(()->new BusinessException("Sipariş bulunamadı"));
         Product product=productService.findById(createOrderItemDto.getProductId()).orElse(null);
 
 

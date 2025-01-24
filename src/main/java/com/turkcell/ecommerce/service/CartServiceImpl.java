@@ -5,6 +5,7 @@ import com.turkcell.ecommerce.dto.cart.CartProductListingDto;
 import com.turkcell.ecommerce.entity.Cart;
 import com.turkcell.ecommerce.entity.CartItem;
 import com.turkcell.ecommerce.entity.Product;
+import com.turkcell.ecommerce.entity.User;
 import com.turkcell.ecommerce.repository.CartItemRepository;
 import com.turkcell.ecommerce.repository.CartRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
@@ -31,6 +32,8 @@ public class CartServiceImpl implements CartService {
     private CartBusinessRules cartBusinessRules;
 
     private final ModelMapper modelMapper;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     public CartServiceImpl(ModelMapper modelMapper) {
@@ -70,8 +73,9 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartDto getCart(UUID userId, UUID cartId) {
-        Cart cart = cartRepository.findCartByUserIdAndCartId(userId, cartId);
+    public CartDto getCart(UUID userId) {
+//        Cart cart = cartRepository.findCartByUserIdAndCartId(userId, cartId);
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new BusinessException("Cart not found"));
         cartBusinessRules.checkIfCartExists(cart);
 
         CartDto cartDTO = modelMapper.map(cart, CartDto.class);
@@ -95,6 +99,16 @@ public class CartServiceImpl implements CartService {
         cartDTO.setProducts(products);
 
         return cartDTO;
+    }
+
+    @Override
+    public CartDto createCart(UUID userId) {
+        User user= userService.findById(userId).orElseThrow(() -> new BusinessException("User not found"));
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cart.setTotalPrice(BigDecimal.ZERO);
+        cartRepository.save(cart);
+        return modelMapper.map(cart, CartDto.class);
     }
 
     @Override

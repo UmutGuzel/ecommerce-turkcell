@@ -11,30 +11,30 @@ import java.util.UUID;
 
 @Service
 public class PermissionServiceImpl implements PermissionService {
-    PermissionRepository permissionRepository;
-    PermissionMapper permissionMapper;
-    public PermissionServiceImpl(PermissionRepository permissionRepository, PermissionMapper permissionMapper) {
-        this.permissionRepository = permissionRepository;
-        this.permissionMapper = permissionMapper;
-    }
-
-    @Override
-    public void add(CreatePermissionDto createPermissionDto) {
-        permissionRepository.save(permissionMapper.toEntity(createPermissionDto));
-    }
-
-    @Override
-    public List<Permission> getAll() {
-        return permissionRepository.findAll();
-    }
-
-    @Override
-    public List<Permission> findByIds(List<UUID> ids) {
-        return permissionRepository.findAllById(ids);
-    }
-
-    @Override
-    public List<Permission> getPermissionsByNames(List<String> names) {
-        return permissionRepository.findAllByNameIn(names);
-    }
+//    PermissionRepository permissionRepository;
+//    PermissionMapper permissionMapper;
+//    public PermissionServiceImpl(PermissionRepository permissionRepository, PermissionMapper permissionMapper) {
+//        this.permissionRepository = permissionRepository;
+//        this.permissionMapper = permissionMapper;
+//    }
+//
+//    @Override
+//    public void add(CreatePermissionDto createPermissionDto) {
+//        permissionRepository.save(permissionMapper.toEntity(createPermissionDto));
+//    }
+//
+//    @Override
+//    public List<Permission> getAll() {
+//        return permissionRepository.findAll();
+//    }
+//
+//    @Override
+//    public List<Permission> findByIds(List<UUID> ids) {
+//        return permissionRepository.findAllById(ids);
+//    }
+//
+//    @Override
+//    public List<Permission> getPermissionsByNames(List<String> names) {
+//        return permissionRepository.findAllByNameIn(names);
+//    }
 }

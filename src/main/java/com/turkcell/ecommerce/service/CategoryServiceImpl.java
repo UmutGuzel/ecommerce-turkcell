@@ -1,5 +1,6 @@
 package com.turkcell.ecommerce.service;
 
+import com.turkcell.ecommerce.dto.category.CategoryDto;
 import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,14 +23,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
-    private final CategoryService categoryService;
+//    private final CategoryService categoryService;
 
 
 
-    public CategoryServiceImpl(@Lazy  CategoryRepository categoryRepository,@Lazy ProductRepository productRepository, @Lazy CategoryService categoryService) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
-        this.categoryService = categoryService;
+//        this.categoryService = categoryService;
     }
 
 
@@ -45,19 +47,29 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryListiningDtos;
     }
 
-    @Override
-    public  List<CategoryListiningDto> getAllCategories() {
-        return categoryService.getAll();    }
+//    @Override
+//    public  List<CategoryListiningDto> getAllCategories() {
+//        return categoryService.getAll();    }
+//
+//
+//    @Override
+//    public List<CategoryListiningDto> getCategoryById() {
+//        return categoryService.getAll();
+//    }
 
-
     @Override
-    public List<CategoryListiningDto> getCategoryById() {
-        return categoryService.getAll();
-    }
+    public CategoryDto getSubcategoriesByParentId(UUID parentId) {
+        Category category = categoryRepository.findById(parentId).orElseThrow(() -> new BusinessException("Kategori bulunamadı."));
 
-    @Override
-    public Optional<Category> getSubcategoriesByParentId(UUID parentId) {
-        return categoryRepository.findById(parentId);
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        categoryDto.setSubCategories(
+                category.getLinkedCategory().stream()
+                        .map(subCategory -> new CategoryDto(subCategory.getId(), subCategory.getName()))
+                        .toList()
+        );
+        return categoryDto;
     }
 
 
@@ -75,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 
 
-    public Category createCategory(@Valid CreateCategoryDto createCategoryDto) {
+    public CategoryDto createCategory(@Valid CreateCategoryDto createCategoryDto) {
 
 
         if (isCategoryNameExists(createCategoryDto.getName())) {
@@ -84,13 +96,26 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = new Category();
         category.setName(createCategoryDto.getName());
-        return categoryRepository.save(category);
+        category.setCreatedAt(new Date(System.currentTimeMillis()));
+        category.setUpdatedAt(new Date(System.currentTimeMillis()));
+        category = categoryRepository.save(category);
+
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        categoryDto.setSubCategories(
+                category.getLinkedCategory().stream()
+                        .map(subCategory -> new CategoryDto(subCategory.getId(), subCategory.getName()))
+                        .toList()
+        );
+
+        return categoryDto;
     }
 
 
-    public Category addSubcategory(UUID ıd, @Valid CreateCategoryDto createCategoryDto) {
+    public CategoryDto addSubcategory(UUID id, @Valid CreateCategoryDto createCategoryDto) {
 
-        Category parentCategory = categoryRepository.findById(ıd)
+        Category parentCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Üst kategori bulunamadı."));
 
 
@@ -98,9 +123,20 @@ public class CategoryServiceImpl implements CategoryService {
         subcategory.setName(createCategoryDto.getName());
         subcategory.setParentCategory(parentCategory); // Üst kategoriye bağladım
 
+        categoryRepository.save(subcategory); // Alt kategoriyi kaydettim
 
         parentCategory.getLinkedCategory().add(subcategory);
-        return categoryRepository.save(parentCategory); // Üst kategoriyi güncelledim
+        Category category = categoryRepository.save(parentCategory); // Üst kategoriyi güncelledim
+
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(category.getId());
+        categoryDto.setName(category.getName());
+        categoryDto.setSubCategories(
+                category.getLinkedCategory().stream()
+                        .map(subCategory -> new CategoryDto(subCategory.getId(), subCategory.getName()))
+                        .toList()
+        );
+        return categoryDto;
     }
 
 

@@ -14,18 +14,18 @@ import java.util.UUID;
 
 @Service
 public class RoleServiceImpl implements RoleService {
-    private final PermissionService permissionService;
+//    private final PermissionService permissionService;
     RoleRepository roleRepository;
     RoleMapper roleMapper;
-    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper, PermissionService permissionService) {
+    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper) {
         this.roleRepository = roleRepository;
         this.roleMapper = roleMapper;
-        this.permissionService = permissionService;
+//        this.permissionService = permissionService;
     }
     @Override
     public void add(CreateRoleDto createRoleDto) {
-        List<Permission> permissions = permissionService.getPermissionsByNames(createRoleDto.getPermissions());
-        Role role = roleMapper.toEntity(createRoleDto, permissions);
+//        List<Permission> permissions = permissionService.getPermissionsByNames(createRoleDto.getPermissions());
+        Role role = roleMapper.toEntity(createRoleDto);
 
         roleRepository.save(role);
     }
