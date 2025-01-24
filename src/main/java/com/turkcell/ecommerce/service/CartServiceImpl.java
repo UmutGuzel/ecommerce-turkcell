@@ -1,7 +1,7 @@
 package com.turkcell.ecommerce.service;
 
-import com.turkcell.ecommerce.dto.cart.CartItemDto;
-import com.turkcell.ecommerce.dto.cart.CartListingDto;
+import com.turkcell.ecommerce.dto.cart.CartDto;
+import com.turkcell.ecommerce.dto.product.ProductDto;
 import com.turkcell.ecommerce.entity.Cart;
 import com.turkcell.ecommerce.entity.CartItem;
 import com.turkcell.ecommerce.entity.Product;
@@ -9,118 +9,194 @@ import com.turkcell.ecommerce.repository.CartItemRepository;
 import com.turkcell.ecommerce.repository.CartRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductRepository productRepository;
+    @Autowired
+    private CartRepository cartRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.productRepository = productRepository;
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    private final ModelMapper modelMapper;
+
+    @Autowired
+    public CartServiceImpl(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public void addProductToCart(UUID userId, UUID productId, int quantity) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
+    public CartDto addProductToCart(UUID cartId, UUID productId, Integer quantity) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı"));
+                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
 
-        if (product.getStock() < quantity) {
-            throw new BusinessException("Yeterli stok yok");
-        }
-
-        CartItem existingCartItem = cartItemRepository.findByCartAndProduct(cart, product);
-
-        if (existingCartItem != null) {
-            int newQuantity = existingCartItem.getQuantity() + quantity;
-            if (newQuantity > product.getStock()) {
-                throw new BusinessException("Sepetteki miktar, stok miktarını aşamaz");
-            }
-            existingCartItem.setQuantity(newQuantity);
-            cartItemRepository.save(existingCartItem);
-        } else {
-            CartItem cartItem = new CartItem();
-            cartItem.setPrice(product.getPrice());
-            cartItem.setQuantity(quantity);
-            cartItem.setProduct(product);
-            cartItem.setCart(cart);
-
-            cartItemRepository.save(cartItem);
-        }
-    }
-
-    @Override
-    public void removeProductFromCart(UUID userId, UUID productId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı"));
-
-        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product);
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
 
         if (cartItem != null) {
-            cartItemRepository.delete(cartItem);
-        } else {
-            throw new BusinessException("Sepette böyle bir ürün bulunmamaktadır");
+            throw new BusinessException(product.getName() + " sepette mevcut.");
         }
+
+        if (product.getStock() == 0) {
+            throw new BusinessException(product.getName() + " stok durumundan dolayı sepete eklenemiyor.");
+        }
+
+        if (product.getStock() < quantity) {
+            throw new BusinessException("Stok durumundan dolayı" + product.getName()
+                    + " ürününden" + product.getStock() + " adetten fazla alamazsınız.");
+        }
+
+        CartItem newCartItem = new CartItem();
+
+        newCartItem.setProduct(product);
+        newCartItem.setCart(cart);
+        newCartItem.setQuantity(quantity);
+        newCartItem.setProductPrice(product.getPrice());
+
+        cartItemRepository.save(newCartItem);
+
+        cart.setTotalPrice(cart.getTotalPrice().add(product.getPrice().multiply(BigDecimal.valueOf(quantity))));
+
+        CartDto cartDTO = modelMapper.map(cart, CartDto.class);
+
+        List<ProductDto> productDtos = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+
+        cartDTO.setProducts(productDtos);
+
+        return cartDTO;
     }
 
     @Override
-    public CartListingDto getCartItems(UUID userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
+    public CartDto getCart(UUID userId, UUID cartId) {
+        Cart cart = cartRepository.findCartByUserIdAndCartId(userId, cartId);
 
-        List<CartItem> cartItems = cartItemRepository.findByCart(cart);
+        if (cart == null) {
+            throw new BusinessException("Sepet bulunamadı.");
+        }
 
-        List<CartItemDto> cartItemDtos = cartItems.stream()
-                .map(item -> new CartItemDto(
-                        item.getProduct().getId(),
-                        item.getProduct().getName(),
-                        item.getProduct().getPrice(),
-                        item.getQuantity(),
-                        item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-                ))
-                .toList();
+        CartDto cartDTO = modelMapper.map(cart, CartDto.class);
 
-        return new CartListingDto(cartItemDtos);
+        List<ProductDto> products = cart.getCartItems().stream()
+                .map(cartItem -> {
+                    if (cartItem.getProduct() == null) {
+                        throw new BusinessException("Sepette ürün bilgisi eksik.");
+                    }
+                    return modelMapper.map(cartItem.getProduct(), ProductDto.class);
+                })
+                .collect(Collectors.toList());
+
+        cartDTO.setProducts(products);
+
+        return cartDTO;
     }
 
     @Override
-    public void updateProductQuantity(UUID userId, UUID productId, int quantity) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
+    public void updateProductInCart(UUID cartId, UUID productId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
 
-        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, productRepository.findById(productId)
-                .orElseThrow(() -> new BusinessException("Ürün bulunamadı")));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
+
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
 
         if (cartItem == null) {
-            throw new BusinessException("Sepette ürün bulunamadı");
+            throw new BusinessException("Ürün " + product.getName() + " sepette bulunmamaktadır.");
         }
 
-        if (quantity <= 0) {
-            throw new BusinessException("Geçerli bir miktar girilmelidir (0'dan büyük)");
+        BigDecimal productTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+
+        BigDecimal cartPrice = cart.getTotalPrice().subtract(productTotalPrice);
+
+        cartItem.setProductPrice(product.getPrice());
+
+        BigDecimal updatedProductTotalPrice = cartItem.getProductPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        cart.setTotalPrice(cartPrice.add(updatedProductTotalPrice));
+
+
+        cartItem = cartItemRepository.save(cartItem);
+    }
+
+    @Override
+    public CartDto updateProductQuantityInCart(UUID cartId, UUID productId, Integer quantity) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new BusinessException("Sepet bulunamadı."));
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
+
+        if (product.getStock() == 0) {
+            throw new BusinessException(product.getName() + " stok durumundan dolayı sepete eklenemiyor.");
         }
 
-        Product product = cartItem.getProduct();
         if (product.getStock() < quantity) {
-            throw new BusinessException("Yeterli stok yok");
+            throw new BusinessException("Stok durumundan dolayı" + product.getName()
+                    + " ürününden" + product.getStock() + " adetten fazla alamazsınız.");
         }
 
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
+        if (cartItem == null) {
+            throw new BusinessException("Ürün " + product.getName() + " sepette bulunmamaktadır.");
+        }
+
+        BigDecimal currentProductTotalPrice = cartItem.getProductPrice()
+                .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        BigDecimal cartPrice = cart.getTotalPrice().subtract(currentProductTotalPrice);
+
+        cartItem.setProductPrice(product.getPrice());
         cartItem.setQuantity(quantity);
 
-        cartItem.getProduct().getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+        BigDecimal updatedProductTotalPrice = cartItem.getProductPrice()
+                .multiply(BigDecimal.valueOf(quantity));
+        cart.setTotalPrice(cartPrice.add(updatedProductTotalPrice));
 
-        cartItemRepository.save(cartItem);
+        cartItem = cartItemRepository.save(cartItem);
+
+        CartDto cartDTO = modelMapper.map(cart, CartDto.class);
+
+        List<ProductDto> productDtos = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), ProductDto.class)).toList();
+
+        cartDTO.setProducts(productDtos);
+
+        return cartDTO;
+    }
+
+
+    @Override
+    public String deleteProductFromCart(UUID cartId, UUID productId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new BusinessException("Sepet bulunamadı"));
+
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
+        if (cartItem == null) {
+            throw new BusinessException("Sepette belirtilen ürün bulunamadı.");
+        }
+
+        BigDecimal productTotalPrice = cartItem.getProductPrice()
+                .multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+
+        BigDecimal updatedCartPrice = cart.getTotalPrice().subtract(productTotalPrice);
+        cart.setTotalPrice(updatedCartPrice);
+
+        cartItemRepository.deleteCartItemByProductIdAndCartId(cartId, productId);
+
+        return cartItem.getProduct().getName() + " başarıyla sepetten kaldırıldı.";
     }
 }

@@ -44,7 +44,8 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<CartItem> orderDetails;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL , orphanRemoval = true)
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 }

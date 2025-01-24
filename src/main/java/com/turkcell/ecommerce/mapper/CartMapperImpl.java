@@ -20,7 +20,7 @@ public class CartMapperImpl implements CartMapper {
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getPrice());
+            orderItem.setPrice(cartItem.getProductPrice());
             orderItem.setOrder(order);
             return orderItem;
         }).collect(Collectors.toList());
