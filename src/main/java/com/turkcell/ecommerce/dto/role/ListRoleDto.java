@@ -13,5 +13,4 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ListRoleDto {
     private String name;
-    private List<ListPermissionDto> permissions;
 }

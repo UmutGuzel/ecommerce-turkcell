@@ -10,22 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/v1/permission")
+//@RestController
+//@RequestMapping("/api/v1/permission")
 public class PermissionController {
-    PermissionService permissionService;
-    public PermissionController(PermissionService permissionService) {
-        this.permissionService = permissionService;
-    }
-
-    @GetMapping("/all")
-    public List<Permission> getAll() {
-        return permissionService.getAll();
-    }
-
-    @PostMapping
-    public void add(CreatePermissionDto createPermissionDto) {
-        permissionService.add(createPermissionDto);
-    }
-
+//    PermissionService permissionService;
+//    public PermissionController(PermissionService permissionService) {
+//        this.permissionService = permissionService;
+//    }
+//
+//    @GetMapping("/all")
+//    public List<Permission> getAll() {
+//        return permissionService.getAll();
+//    }
+//
+//    @PostMapping
+//    public void add(CreatePermissionDto createPermissionDto) {
+//        permissionService.add(createPermissionDto);
+//    }
+//
 }

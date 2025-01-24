@@ -9,7 +9,7 @@ import com.turkcell.ecommerce.entity.Role;
 import java.util.List;
 
 public interface RoleMapper {
-    Role toEntity(CreateRoleDto createRoleDto, List<Permission> permissions);
+    Role toEntity(CreateRoleDto createRoleDto);
     Role toEntity(UpdateRoleDto updateRoleDto);
     List<ListRoleDto> toListRoleDto(List<Role> roles);
 }

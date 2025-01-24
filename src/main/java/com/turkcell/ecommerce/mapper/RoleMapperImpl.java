@@ -13,10 +13,9 @@ import java.util.List;
 @Service
 public class RoleMapperImpl implements RoleMapper {
     @Override
-    public Role toEntity(CreateRoleDto createRoleDto, List<Permission> permissions) {
+    public Role toEntity(CreateRoleDto createRoleDto) {
         Role role = new Role();
         role.setName(createRoleDto.getName());
-        role.setPermissions(permissions);
         return role;
     }
 
@@ -30,10 +29,7 @@ public class RoleMapperImpl implements RoleMapper {
     public List<ListRoleDto> toListRoleDto(List<Role> roles) {
         return roles.stream()
                 .map(role ->
-                        new ListRoleDto(role.getName(), role.getPermissions().stream()
-                                .map(permission ->
-                                        new ListPermissionDto(permission.getName(), permission.getDescription()))
-                                .toList()))
+                        new ListRoleDto(role.getName()))
                 .toList();
     }
 }

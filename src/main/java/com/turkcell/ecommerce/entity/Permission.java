@@ -16,8 +16,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "permissions")
+//@Entity
+//@Table(name = "permissions")
 public class Permission {
     @Id
     @UuidGenerator
@@ -33,7 +33,7 @@ public class Permission {
     @Column(name="updated_at")
     private Date updatedAt;
 
-    @ManyToMany(mappedBy = "permissions")
-    @JsonIgnore
-    private List<Role> roles;
+//    @ManyToMany(mappedBy = "permissions")
+//    @JsonIgnore
+//    private List<Role> roles;
 }

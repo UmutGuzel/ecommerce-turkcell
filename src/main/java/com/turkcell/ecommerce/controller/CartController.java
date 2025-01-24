@@ -15,9 +15,16 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @GetMapping("{cartId}/userId/{userId}")
-    public ResponseEntity<CartDto> getCartByUserId(@PathVariable UUID userId, @PathVariable UUID cartId) {
-        CartDto cartDto = cartService.getCart(userId, cartId);
+    @GetMapping("/userId/{userId}")
+    public ResponseEntity<CartDto> getCartByUserId(@PathVariable UUID userId) {
+//        CartDto cartDto = cartService.getCart(userId, cartId);
+        CartDto cartDto = cartService.getCart(userId);
+        return new ResponseEntity<CartDto>(cartDto, HttpStatus.OK);
+    }
+
+    @PostMapping("createCart/{userId}")
+    public ResponseEntity<CartDto> createCartByUserId(@PathVariable UUID userId) {
+        CartDto cartDto = cartService.createCart(userId);
         return new ResponseEntity<CartDto>(cartDto, HttpStatus.OK);
     }
 

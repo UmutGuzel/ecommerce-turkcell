@@ -1,5 +1,6 @@
 package com.turkcell.ecommerce.controller;
 
+import com.turkcell.ecommerce.dto.category.CategoryDto;
 import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
@@ -25,15 +26,15 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
-        Category createdCategory = categoryService.createCategory(createCategoryDto);
+    public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CreateCategoryDto createCategoryDto) {
+        CategoryDto createdCategory = categoryService.createCategory(createCategoryDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
     }
     @PostMapping("/{parentId}/subcategories")
-    public ResponseEntity<Category> addSubcategory(
+    public ResponseEntity<CategoryDto> addSubcategory(
             @PathVariable UUID parentId,
             @Valid @RequestBody CreateCategoryDto createCategoryDto) {
-        Category createdSubcategory = categoryService.addSubcategory(parentId, createCategoryDto);
+        CategoryDto createdSubcategory = categoryService.addSubcategory(parentId, createCategoryDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSubcategory);
     }
 
@@ -41,16 +42,16 @@ public class CategoryController {
 
     @GetMapping
     public  List<CategoryListiningDto> getAllCategories() {
-        return this.categoryService.getAllCategories();
+        return this.categoryService.getAll();
     }
 
     @GetMapping("/{id}")
-    public List<CategoryListiningDto> getCategoryById(@PathVariable UUID id) {
-        return this.categoryService.getCategoryById();
+    public CategoryDto getCategoryById(@PathVariable UUID id) {
+        return this.categoryService.getSubcategoriesByParentId(id);
     }
 
     @GetMapping("/{parentId}/subcategories")
-    public Optional<Category> getSubcategories(@PathVariable UUID parentId) {
+    public CategoryDto getSubcategories(@PathVariable UUID parentId) {
         return categoryService.getSubcategoriesByParentId(parentId);
     }
 

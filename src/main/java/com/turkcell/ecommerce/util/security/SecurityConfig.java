@@ -24,12 +24,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(req -> req
 //                    .requestMatchers("/api/v1/user/login", "/api/v1/user/register").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/user/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/v1/user/**").authenticated()
-//                    .requestMatchers(HttpMethod., "/api/v1//**").hasAnyAuthority("admin", "user")
-                    .requestMatchers(HttpMethod.POST, "/api/v1/**").hasAnyAuthority("admin")
-                    .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasAnyAuthority("admin")
-                    .requestMatchers("/api/v1/**").hasAnyAuthority("admin", "user", "seller")
-//                    .requestMatchers("/**").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").hasAnyAuthority("admin")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/**").hasAnyAuthority("admin")
+                    .requestMatchers("/api/v1/**").authenticated()
                     .anyRequest().permitAll()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

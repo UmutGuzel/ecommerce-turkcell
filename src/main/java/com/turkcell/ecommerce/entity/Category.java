@@ -42,6 +42,6 @@ public class Category {
 
 
     @OneToMany(mappedBy="parentCategory")
-    private Set<Category> linkedCategory = new HashSet<Category>();
+    private List<Category> linkedCategory;
 
 }

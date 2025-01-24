@@ -7,6 +7,7 @@ import com.turkcell.ecommerce.entity.*;
 import com.turkcell.ecommerce.mapper.CartMapper;
 import com.turkcell.ecommerce.mapper.OrderMapper;
 import com.turkcell.ecommerce.repository.*;
+import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
         order.setCreatedAt((java.sql.Date) new Date());
         order.setUser(cart.getUser());
         order.setOrderStatus(orderStatusRepository.findByStatus("Hazırlanıyor")
-                .orElseThrow(() -> new RuntimeException("Default status not found")));
+                .orElseThrow(() -> new BusinessException("Sipariş durumu bulunamadı.")));
 
         List<OrderItem> orderItems = cartMapper.toOrderItems(cart, order);
 
@@ -90,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getOrderById(UUID orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new BusinessException("Sipariş bulunamadı."));
         return orderMapper.toOrderResponse(order);
     }
 
@@ -103,10 +104,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse updateOrderStatus(UpdateOrderStatusDto request) {
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new BusinessException("Sipariş bulunamadı."));
 
         OrderStatus orderStatus = orderStatusRepository.findByStatus(request.getNewStatus())
-                .orElseThrow(() -> new RuntimeException("Invalid status"));
+                .orElseThrow(() -> new BusinessException("Uygun olmayan sipariş durumu."));
 
         order.setOrderStatus(orderStatus);
         order.setUpdatedAt((java.sql.Date) new Date());

@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-//    @ExceptionHandler({Exception.class})
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public GeneralExceptionResult handleException(Exception e) {
-//        return new GeneralExceptionResult("InternalServerError");
-//    }
+    @ExceptionHandler({Exception.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public GeneralExceptionResult handleException(Exception e) {
+        return new GeneralExceptionResult("Bilinmeyen bir hata oluştu");
+    }
 
     @ExceptionHandler({BusinessException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)

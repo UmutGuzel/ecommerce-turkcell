@@ -29,7 +29,7 @@ public class RoleController {
         roleService.add(createRoleDto);
     }
 
-    @PutMapping
+//    @PutMapping
     public void update() {
         //TODO: implement
     }

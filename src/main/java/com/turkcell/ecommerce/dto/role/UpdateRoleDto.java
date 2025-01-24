@@ -10,5 +10,4 @@ import java.util.UUID;
 @Setter
 public class UpdateRoleDto {
     private String name;
-    private List<UUID> permissionIds;
 }

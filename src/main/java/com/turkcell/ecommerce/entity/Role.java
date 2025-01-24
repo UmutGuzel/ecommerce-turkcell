@@ -24,12 +24,12 @@ public class Role {
     @Column(name="name", unique = true)
     private String name;
 
-    @ManyToMany
-    @JoinTable(
-            name = "roles_permissions",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private List<Permission> permissions;
+//    @ManyToMany
+//    @JoinTable(
+//            name = "roles_permissions",
+//            joinColumns = @JoinColumn(name = "role_id"),
+//            inverseJoinColumns = @JoinColumn(name = "permission_id"))
+//    private List<Permission> permissions;
 
     @ManyToMany(mappedBy = "roles")
     private List<User> users;

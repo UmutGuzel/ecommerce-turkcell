@@ -1,5 +1,6 @@
 package com.turkcell.ecommerce.service;
 
+import com.turkcell.ecommerce.dto.category.CategoryDto;
 import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
@@ -10,12 +11,10 @@ import java.util.UUID;
 
 public interface CategoryService {
     Optional<Category> findById(UUID id);
-    Category createCategory(CreateCategoryDto createCategoryDto);
-    Category addSubcategory(UUID id,CreateCategoryDto createCategoryDto);
+    CategoryDto createCategory(CreateCategoryDto createCategoryDto);
+    CategoryDto addSubcategory(UUID id,CreateCategoryDto createCategoryDto);
     List<CategoryListiningDto> getAll();
-    List<CategoryListiningDto> getAllCategories();
-    List<CategoryListiningDto> getCategoryById();
-    Optional<Category> getSubcategoriesByParentId(UUID parentId);
+    CategoryDto getSubcategoriesByParentId(UUID parentId);
     void deleteCategory(UUID id);
 
 
