@@ -24,8 +24,9 @@ public class RoleServiceImpl implements RoleService {
     }
     @Override
     public void add(CreateRoleDto createRoleDto) {
-        List<Permission> permissions = permissionService.findByIds(createRoleDto.getPermissionIds());
+        List<Permission> permissions = permissionService.getPermissionsByNames(createRoleDto.getPermissions());
         Role role = roleMapper.toEntity(createRoleDto, permissions);
+
         roleRepository.save(role);
     }
 

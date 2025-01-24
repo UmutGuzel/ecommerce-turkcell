@@ -10,21 +10,5 @@ import java.util.UUID;
 @Setter
 public class CreateRoleDto {
     private String name;
-    private List<UUID> permissionIds;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<UUID> getPermissionIds() {
-        return permissionIds;
-    }
-
-    public void setPermissionIds(List<UUID> permissionIds) {
-        this.permissionIds = permissionIds;
-    }
+    private List<String> permissions;
 }

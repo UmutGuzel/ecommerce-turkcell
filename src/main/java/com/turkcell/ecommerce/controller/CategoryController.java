@@ -4,6 +4,7 @@ import com.turkcell.ecommerce.dto.category.CategoryListiningDto;
 import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.service.CategoryService;
+import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +57,7 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
         if (categoryService.isCategoryAssociatedWithProducts(id)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Kategori, ürünlerle ilişkilendirildiği için silinemez.");
+            throw new BusinessException("Kategori, ürünlerle ilişkilendirildiği için silinemez.");
         }
 
         // Kategoriyi siliyorum

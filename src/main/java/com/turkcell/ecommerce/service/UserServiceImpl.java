@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService{
        userBusinessRules.ValidateUser(optionalUser);
 
        List<Role> roles = roleService.getRolesByNames(createUserDto.getRoles());
+       if(!roles.isEmpty())
+           userBusinessRules.ValidateRoles(roles);
+
        createUserDto.setPassword(bCryptPasswordEncoder.encode(createUserDto.getPassword()));
        User user = userMapper.toEntity(createUserDto, roles);
 

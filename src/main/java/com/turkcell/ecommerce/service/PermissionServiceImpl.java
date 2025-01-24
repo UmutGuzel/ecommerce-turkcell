@@ -32,4 +32,9 @@ public class PermissionServiceImpl implements PermissionService {
     public List<Permission> findByIds(List<UUID> ids) {
         return permissionRepository.findAllById(ids);
     }
+
+    @Override
+    public List<Permission> getPermissionsByNames(List<String> names) {
+        return permissionRepository.findAllByNameIn(names);
+    }
 }

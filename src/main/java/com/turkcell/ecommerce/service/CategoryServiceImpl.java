@@ -5,6 +5,7 @@ import com.turkcell.ecommerce.dto.category.CreateCategoryDto;
 import com.turkcell.ecommerce.entity.Category;
 import com.turkcell.ecommerce.repository.CategoryRepository;
 import com.turkcell.ecommerce.repository.ProductRepository;
+import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 
         if (isCategoryNameExists(createCategoryDto.getName())) {
-            throw new IllegalArgumentException("Bu kategori adı zaten mevcut.");
+            throw new BusinessException("Bu kategori adı zaten mevcut.");
         }
 
         Category category = new Category();
@@ -90,7 +91,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category addSubcategory(UUID ıd, @Valid CreateCategoryDto createCategoryDto) {
 
         Category parentCategory = categoryRepository.findById(ıd)
-                .orElseThrow(() -> new IllegalArgumentException("Üst kategori bulunamadı."));
+                .orElseThrow(() -> new BusinessException("Üst kategori bulunamadı."));
 
 
         Category subcategory = new Category();

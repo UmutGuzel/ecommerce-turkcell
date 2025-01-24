@@ -23,8 +23,8 @@ public class CreateUserDto {
     private String email;
 
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message="Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.")
-    @Length(min=8)
-    @NotBlank
+    @Length(min=8, message="Şifre en az 8 karakter olmalıdır.")
+    @NotBlank(message = "Şifre alanı boş bırakılamaz.")
     private String password;
     private List<String> roles;
 }
