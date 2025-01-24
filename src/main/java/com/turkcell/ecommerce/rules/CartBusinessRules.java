@@ -5,7 +5,7 @@ import com.turkcell.ecommerce.entity.CartItem;
 import com.turkcell.ecommerce.entity.Product;
 import com.turkcell.ecommerce.repository.CartItemRepository;
 import com.turkcell.ecommerce.repository.CartRepository;
-import com.turkcell.ecommerce.repository.ProductRepository;
+import com.turkcell.ecommerce.service.ProductService;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class CartBusinessRules {
     private CartRepository cartRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductService productService;
 
     @Autowired
     private CartItemRepository cartItemRepository;
@@ -30,7 +30,7 @@ public class CartBusinessRules {
     }
 
     public Product productMustExist(UUID productId) {
-        return productRepository.findById(productId)
+        return productService.findById(productId)
                 .orElseThrow(() -> new BusinessException("Ürün bulunamadı."));
     }
 
@@ -55,19 +55,31 @@ public class CartBusinessRules {
         }
     }
 
-    public CartItem cartItemMustExist(UUID cartId, UUID productId) {
-        return cartItemRepository.findByCartIdAndProductId(cartId, productId)
-                .orElseThrow(() -> new BusinessException("Sepet ürünü bulunamadı."));
-    }
-
-    public Cart cartMustExistForUser(UUID userId, UUID cartId) {
-        return cartRepository.findByIdAndUserId(cartId, userId)
-                .orElseThrow(() -> new BusinessException("Kullanıcıya ait sepet bulunamadı."));
-    }
-
-    public void ensureProductExistsInCartItem(CartItem cartItem) {
-        if (cartItem.getProduct() == null) {
-            throw new BusinessException("Ürün, sepet öğesinde mevcut değil.");
+    public void checkUpdateQuantityIsValid(Integer quantity) {
+        if (quantity < 1) {
+            throw new BusinessException("Ürün miktarı 1'den küçük olamaz.");
         }
+    }
+
+    public void checkIfCartExists(Cart cart) {
+        if (cart == null) {
+            throw new BusinessException("Sepet bulunamadı.");
+        }
+    }
+
+    public void checkIfProductInfoExists(CartItem cartItem) {
+        if (cartItem.getProduct() == null) {
+            throw new BusinessException("Sepette ürün bilgisi eksik.");
+        }
+    }
+
+    public CartItem checkCartItemExists(UUID cartId, UUID productId) {
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
+        if (cartItem == null) {
+            throw new BusinessException("Sepette belirtilen ürün bulunamadı.");
+        }
+
+        return cartItem;
     }
 }

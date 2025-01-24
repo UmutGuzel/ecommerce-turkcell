@@ -46,8 +46,8 @@ public class ProductController {
         this.productService.delete(deleteProductDto);
 
         return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .build();
+                .status(HttpStatus.OK)
+                .body("Ürün başarıyla silindi.");
     }
 
     @GetMapping()
