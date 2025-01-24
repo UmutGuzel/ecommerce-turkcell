@@ -15,20 +15,19 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @GetMapping("{userId}/cart/{cartId}")
+    @GetMapping("{cartId}/userId/{userId}")
     public ResponseEntity<CartDto> getCartByUserId(@PathVariable UUID userId, @PathVariable UUID cartId) {
         CartDto cartDto = cartService.getCart(userId, cartId);
-
-        return new ResponseEntity<CartDto>(cartDto, HttpStatus.FOUND);
+        return new ResponseEntity<CartDto>(cartDto, HttpStatus.OK);
     }
 
-    @PutMapping("{cartId}/products/{productId}/quantity/{quantity}")
+    @PutMapping("{cartId}/product/{productId}/quantity/{quantity}")
     public ResponseEntity<String> updateCartProduct(@PathVariable UUID cartId, @PathVariable UUID productId, @PathVariable Integer quantity) {
         this.cartService.updateProductQuantityInCart(cartId, productId, quantity);
         return ResponseEntity.ok("Ürün miktarı başarıyla güncellendi.");
     }
 
-    @PostMapping("{cartId}/products/{productId}/quantity/{quantity}")
+    @PostMapping("{cartId}/product/{productId}/quantity/{quantity}")
     public ResponseEntity<String> addProductToCart(@PathVariable UUID cartId, @PathVariable UUID productId, @PathVariable Integer quantity) {
         this.cartService.addProductToCart(cartId, productId, quantity);
         return ResponseEntity.status(HttpStatus.CREATED).body("Ürün başarıyla sepete eklendi.");
@@ -37,7 +36,6 @@ public class CartController {
     @DeleteMapping("{cartId}/product/{productId}")
     public ResponseEntity<String> deleteProductFromCart(@PathVariable UUID cartId, @PathVariable UUID productId) {
         String status = cartService.deleteProductFromCart(cartId, productId);
-
-        return new ResponseEntity<String>(status, HttpStatus.OK);
+        return ResponseEntity.ok(status);
     }
 }

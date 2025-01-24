@@ -16,6 +16,6 @@ public class CategoryBusinessRules {
 
     public void categoryMustExist(UUID id)
     {
-        categoryRepository.findById(id).orElseThrow(() -> new BusinessException("Category not found"));
+        categoryRepository.findById(id).orElseThrow(() -> new BusinessException("Kategori bulunamadı."));
     }
 }
