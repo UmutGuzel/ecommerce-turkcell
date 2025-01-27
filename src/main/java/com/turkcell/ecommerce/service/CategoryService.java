@@ -16,7 +16,4 @@ public interface CategoryService {
     List<CategoryListiningDto> getAll();
     CategoryDto getSubcategoriesByParentId(UUID parentId);
     void deleteCategory(UUID id);
-
-
-    boolean isCategoryAssociatedWithProducts(UUID id);
 }

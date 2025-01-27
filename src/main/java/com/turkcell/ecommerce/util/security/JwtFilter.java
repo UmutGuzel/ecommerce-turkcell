@@ -34,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter
 
     if(jwtHeader != null && jwtHeader.startsWith("Bearer ")) {
         String jwt = jwtHeader.substring(7);
-        String username = jwtService.extractUsername(jwt);
+        String email = jwtService.extractEmail(jwt);
         List<String> roles = jwtService.extractRoles(jwt);
 
         List<GrantedAuthority> authorities = roles
@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter
                 .toList();
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                username,
+                email,
                 null,
                 authorities
         );

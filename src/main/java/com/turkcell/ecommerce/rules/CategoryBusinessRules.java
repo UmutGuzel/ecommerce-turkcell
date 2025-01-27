@@ -18,4 +18,12 @@ public class CategoryBusinessRules {
     {
         categoryRepository.findById(id).orElseThrow(() -> new BusinessException("Kategori bulunamadı."));
     }
+
+    public void productExistWithCategory(boolean exist)
+    {
+        if(exist)
+        {
+            throw new BusinessException("Kategoriye ait ürün bulunmaktadır, kategori silinemez.");
+        }
+    }
 }

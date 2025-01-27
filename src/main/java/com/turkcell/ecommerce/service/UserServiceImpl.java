@@ -41,12 +41,12 @@ public class UserServiceImpl implements UserService{
        Optional<User> optionalUser = userRepository.findByEmail(createUserDto.getEmail());
        userBusinessRules.ValidateUser(optionalUser);
 
-       List<Role> roles = roleService.getRolesByNames(createUserDto.getRoles());
-       if(!roles.isEmpty())
-           userBusinessRules.ValidateRoles(roles);
+       Role role = roleService.getRoleByName("user");
+       if (role == null)
+          role = roleService.add("user");
 
        createUserDto.setPassword(bCryptPasswordEncoder.encode(createUserDto.getPassword()));
-       User user = userMapper.toEntity(createUserDto, roles);
+       User user = userMapper.toEntity(createUserDto, role);
 
        userRepository.save(user);
     }
@@ -62,9 +62,15 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public void changeRole() {
+        //TODO: admin role change functionality
+    }
+
+    @Override
     public List<ListUserDto> getAll() {
         SecurityContext context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
+        String email = context.getAuthentication().getName();
+        System.out.println(email);
         List<User> users = userRepository.findAll();
         return userMapper.toListUserDto(users);
     }
@@ -77,7 +83,6 @@ public class UserServiceImpl implements UserService{
         Map<String,Object> roles = new HashMap<>();
         roles.put("roles", user.getRoles().stream().map(c->c.getName()).toList());
         return jwtService.generateToken(user.getEmail(), roles);
-
     }
 
     @Override

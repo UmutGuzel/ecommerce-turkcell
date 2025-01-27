@@ -26,5 +26,4 @@ public class CreateUserDto {
     @Length(min=8, message="Şifre en az 8 karakter olmalıdır.")
     @NotBlank(message = "Şifre alanı boş bırakılamaz.")
     private String password;
-    private List<String> roles;
 }

@@ -89,4 +89,9 @@ public class ProductServiceImpl implements ProductService{
     public Optional<Product> findProductsByCategoryId(UUID categoryId) {
         return Optional.empty();
     }
+
+    @Override
+    public boolean isProductExist(UUID categoryId) {
+        return productRepository.existsByCategoryId(categoryId);
+    }
 }
