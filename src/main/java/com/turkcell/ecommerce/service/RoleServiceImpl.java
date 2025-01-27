@@ -31,6 +31,12 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Role add(String name) {
+        Role role = roleMapper.toEntity(name);
+        return roleRepository.save(role);
+    }
+
+    @Override
     public void update(UpdateRoleDto updateRoleDto) {
 
         //TODO: implement
@@ -44,5 +50,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> getRolesByNames(List<String> names) {
         return roleRepository.findAllByNameIn(names);
+    }
+
+    @Override
+    public Role getRoleByName(String name) {
+        return roleRepository.getRoleByName(name);
     }
 }

@@ -52,4 +52,11 @@ public class UserBusinessRules {
         if(roles.stream().filter(role -> role.getName().equals("admin")).count() > 0)
             throw new BusinessException("Admin rolü atanamaz");
     }
+
+
+    public void ValidateRoleNotNull(Role role)
+    {
+        if(role == null)
+            throw new BusinessException("Rol bulunamadı");
+    }
 }

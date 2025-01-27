@@ -25,7 +25,20 @@ public class UserMapperImpl implements UserMapper {
             return user;
         }
 
-        public User toEntity(ChangeUserPasswordDto changeUserPasswordDto) {
+    @Override
+    public User toEntity(CreateUserDto createUserDto, Role role) {
+        User user = new User();
+        user.setName(createUserDto.getName());
+        user.setSurname(createUserDto.getSurname());
+        user.setEmail(createUserDto.getEmail());
+        user.setPassword(createUserDto.getPassword());
+        user.setCreatedAt(new Date(System.currentTimeMillis()));
+        user.setUpdatedAt(new Date(System.currentTimeMillis()));
+        user.setRoles(List.of(role));
+        return user;
+    }
+
+    public User toEntity(ChangeUserPasswordDto changeUserPasswordDto) {
             User user = new User();
             user.setName(changeUserPasswordDto.getName());
             user.setEmail(changeUserPasswordDto.getEmail());

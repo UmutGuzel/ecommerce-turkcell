@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface RoleMapper {
     Role toEntity(CreateRoleDto createRoleDto);
+    Role toEntity(String name);
     Role toEntity(UpdateRoleDto updateRoleDto);
     List<ListRoleDto> toListRoleDto(List<Role> roles);
 }

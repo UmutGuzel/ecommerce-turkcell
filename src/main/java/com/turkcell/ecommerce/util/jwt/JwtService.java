@@ -21,11 +21,11 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    public String generateToken(String username, Map<String, Object> extraClaims) {
+    public String generateToken(String email, Map<String, Object> extraClaims) {
         return Jwts
                 .builder()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .subject(username)
+                .subject(email)
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .claims(extraClaims)
                 .signWith(getSignKey())
@@ -43,7 +43,7 @@ public class JwtService {
         return claims.getExpiration().after(new Date());
     }
 
-    public String extractUsername(String token)
+    public String extractEmail(String token)
     {
         Claims claims = Jwts
                 .parser()

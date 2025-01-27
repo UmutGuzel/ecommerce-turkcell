@@ -14,6 +14,7 @@ import java.util.UUID;
 public interface UserService {
     void add(CreateUserDto createUserDto);
     void update(ChangeUserPasswordDto changeUserPasswordDto);
+    void changeRole();
     List<ListUserDto> getAll();
     String login(LoginUserDto loginUserDto);
     Optional<User> findById(UUID id);

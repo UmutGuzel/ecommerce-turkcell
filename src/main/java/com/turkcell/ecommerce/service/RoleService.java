@@ -10,7 +10,9 @@ import java.util.UUID;
 
 public interface RoleService {
     void add(CreateRoleDto createRoleDto);
+    Role add(String name);
     void update(UpdateRoleDto updateRoleDto);
     List<ListRoleDto> getAll();
     List<Role> getRolesByNames(List<String> names);
+    Role getRoleByName(String name);
 }

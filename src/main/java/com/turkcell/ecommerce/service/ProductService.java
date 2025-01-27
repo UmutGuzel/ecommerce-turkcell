@@ -18,4 +18,5 @@ public interface ProductService {
     List<ProductListingDto> getAll(String categoryName, BigDecimal minPrice, BigDecimal maxPrice, Boolean inStock, String sortBy, String sortOrder);
     Optional<Product> findById(UUID id);
     Optional<Product> findProductsByCategoryId(UUID categoryId);
+    boolean isProductExist(UUID categoryId);
 }

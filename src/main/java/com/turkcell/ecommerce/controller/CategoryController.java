@@ -57,9 +57,6 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable UUID id) {
-        if (categoryService.isCategoryAssociatedWithProducts(id)) {
-            throw new BusinessException("Kategori, ürünlerle ilişkilendirildiği için silinemez.");
-        }
 
         // Kategoriyi siliyorum
         categoryService.deleteCategory(id);

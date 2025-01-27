@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface UserMapper {
     User toEntity(CreateUserDto createUserDto, List<Role> roles);
+    User toEntity(CreateUserDto createUserDto, Role role);
     User toEntity(ChangeUserPasswordDto changeUserPasswordDto);
     public List<ListUserDto> toListUserDto(List<User> users);
 }
