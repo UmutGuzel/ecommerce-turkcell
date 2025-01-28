@@ -26,13 +26,15 @@ public class UserServiceImpl implements UserService{
     private final UserBusinessRules userBusinessRules;
     private final RoleService roleService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CartService cartService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, JwtService jwtService, UserBusinessRules userBusinessRules, RoleService roleService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, JwtService jwtService, UserBusinessRules userBusinessRules, RoleService roleService, CartService cartService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.jwtService = jwtService;
         this.userBusinessRules = userBusinessRules;
         this.roleService = roleService;
+        this.cartService = cartService;
         bCryptPasswordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -49,6 +51,7 @@ public class UserServiceImpl implements UserService{
        User user = userMapper.toEntity(createUserDto, role);
 
        userRepository.save(user);
+       cartService.createCart(user);
     }
 
     @Override
