@@ -11,7 +11,8 @@ import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Siparişi oluşturma
         Order order = new Order();
-        order.setCreatedAt((java.sql.Date) new Date());
+        order.setCreatedAt(new Date(System.currentTimeMillis()));
         order.setUser(cart.getUser());
         order.setOrderStatus(orderStatusRepository.findByStatus("Hazırlanıyor")
                 .orElseThrow(() -> new BusinessException("Sipariş durumu bulunamadı.")));
@@ -83,6 +84,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Sepeti temizle (cart itemleri silinirse sepet temizlenmiş olur sanırım :D)
         cart.getCartItems().clear();
+        cart.setTotalPrice(BigDecimal.ZERO);
         cartRepository.save(cart);
 
         return orderMapper.toOrderResponse(order);
@@ -110,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new BusinessException("Uygun olmayan sipariş durumu."));
 
         order.setOrderStatus(orderStatus);
-        order.setUpdatedAt((java.sql.Date) new Date());
+        order.setUpdatedAt(new Date(System.currentTimeMillis()));
         orderRepository.save(order);
 
         return orderMapper.toOrderResponse(order);

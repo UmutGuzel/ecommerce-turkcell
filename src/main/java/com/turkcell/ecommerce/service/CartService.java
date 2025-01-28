@@ -1,18 +1,21 @@
 package com.turkcell.ecommerce.service;
 
+import com.turkcell.ecommerce.dto.cart.AddProductToCartDto;
 import com.turkcell.ecommerce.dto.cart.CartDto;
+import com.turkcell.ecommerce.dto.cart.DeleteProductFromCartDto;
+import com.turkcell.ecommerce.dto.cart.UpdateCartProductQuantityDto;
+import com.turkcell.ecommerce.entity.User;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CartService {
-    CartDto addProductToCart(UUID cartId, UUID productId, Integer quantity);
+    void addProductToCart(AddProductToCartDto addProductToCartDto);
 
     CartDto getCart(UUID userId);
 
-    CartDto createCart(UUID userId);
+    void createCart(User user);
 
-    CartDto updateProductQuantityInCart(UUID cartId, UUID productId, Integer quantity);
+    void updateCartProductQuantity(UpdateCartProductQuantityDto updateCartProductQuantityDto);
 
-    String deleteProductFromCart(UUID cartId, UUID productId);
+    void deleteProductFromCart(DeleteProductFromCartDto deleteProductFromCartDto);
 }

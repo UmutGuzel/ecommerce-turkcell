@@ -23,9 +23,15 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
 //                    .requestMatchers("/api/v1/user/login", "/api/v1/user/register").permitAll()
+
+//                    .requestMatchers("/").authenticated().anyRequest().permitAll())
+
                     .requestMatchers(HttpMethod.POST, "/api/v1/user/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").hasAnyAuthority("admin")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/**").hasAnyAuthority("admin")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyAuthority("admin")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAnyAuthority("admin")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAnyAuthority("admin")
                     .requestMatchers("/api/v1/**").authenticated()
                     .anyRequest().permitAll()
             )
