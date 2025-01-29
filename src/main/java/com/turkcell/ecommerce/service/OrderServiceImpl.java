@@ -7,6 +7,7 @@ import com.turkcell.ecommerce.entity.*;
 import com.turkcell.ecommerce.mapper.CartMapper;
 import com.turkcell.ecommerce.mapper.OrderMapper;
 import com.turkcell.ecommerce.repository.*;
+import com.turkcell.ecommerce.rules.OrderBusinessRules;
 import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -34,11 +35,15 @@ public class OrderServiceImpl implements OrderService {
     private  OrderStatusService orderStatusService;
     @Autowired
     private  OrderMapper orderMapper;
+    @Autowired
+    private  OrderBusinessRules orderBusinessRules;
 
     private  final CartMapper cartMapper;
 
+
     public OrderServiceImpl(CartMapper cartMapper) {
         this.cartMapper = cartMapper;
+
     }
 
 
@@ -51,6 +56,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderCreateRequest request) {
         String email = getCurrentUserEmail();
 
+        orderBusinessRules.validateEmailFormat(email);
 
         Cart cart = cartService.getCartByIdAndUserEmail(request.getCartId(), email);
 
@@ -103,7 +109,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getOrderById(UUID orderId) {
-        return null;
+        String email = getCurrentUserEmail();
+
+        // Validate email format and order ownership
+        orderBusinessRules.validateEmailFormat(email);
+        orderBusinessRules.validateOrderOwnership(orderId, email);
+
+        return orderMapper.toOrderResponse(
+                orderRepository.findById(orderId)
+                        .orElseThrow(() -> new BusinessException("Order not found!"))
+        );
     }
 
     @Override
@@ -112,16 +127,6 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByUserEmail(email).stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
-    }
-
-
-    private String getCurrentUserEmail() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User not authenticated");
-        }
-        return authentication.getName();
     }
 
     @Override
@@ -148,5 +153,17 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
 
         return orderMapper.toOrderResponse(order);
+    }
+
+
+    // Helper method to get the current user's email
+    private String getCurrentUserEmail() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        // Check if the user is authenticated
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("User not authenticated");
+        }
+        return authentication.getName();
     }
 }
