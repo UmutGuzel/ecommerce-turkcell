@@ -13,9 +13,8 @@ import com.turkcell.ecommerce.rules.ProductBusinessRules;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService{
@@ -94,4 +93,37 @@ public class ProductServiceImpl implements ProductService{
     public boolean isProductExist(UUID categoryId) {
         return productRepository.existsByCategoryId(categoryId);
     }
+
+
+// Order required services
+public List<String> validateStock(Map<UUID, Integer> productQuantities) {
+    List<UUID> productIds = new ArrayList<>(productQuantities.keySet());
+    List<Product> products = productRepository.findAllById(productIds);
+
+    List<String> errors = new ArrayList<>();
+
+    // Check for missing products
+    Set<UUID> foundProductIds = products.stream()
+            .map(Product::getId)
+            .collect(Collectors.toSet());
+    productIds.stream()
+            .filter(id -> !foundProductIds.contains(id))
+            .forEach(id -> errors.add("Product not found: " + id));
+
+    // Check stock for valid products
+    products.forEach(product -> {
+        int requestedQuantity = productQuantities.get(product.getId());
+        if (product.getStock() < requestedQuantity) {
+            errors.add("Insufficient stock for product: " + product.getDescription());
+        }
+    });
+
+    return errors;
+}
+
+    @Override
+    public void decreaseStock(UUID id, Integer quantity) {
+        productRepository.updateStock(id, quantity);
+    }
+
 }

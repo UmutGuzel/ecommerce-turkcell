@@ -150,4 +150,24 @@ public class CartServiceImpl implements CartService {
 
         cartItemRepository.deleteCartItemByProductIdAndCartId(deleteProductFromCartDto.getCartId(), deleteProductFromCartDto.getProductId());
     }
+
+    //Required cart services for order services
+
+    public Cart getCartByIdAndUserEmail(UUID cartId, String email) {
+        return cartRepository.findByIdAndUserEmail(cartId, email)
+                .orElseThrow(() -> new BusinessException("Cart not found for user"));
+    }
+
+    public void clearCart(UUID cartId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new BusinessException("Cart not found"));
+
+        // Delete all cart items
+        cartItemRepository.deleteAllByCartId(cartId);
+
+        // Reset cart total
+        cart.setTotalPrice(BigDecimal.ZERO);
+        cartRepository.save(cart);
+    }
+
 }

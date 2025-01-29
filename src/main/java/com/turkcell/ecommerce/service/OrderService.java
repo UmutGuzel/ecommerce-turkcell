@@ -14,6 +14,9 @@ public interface OrderService {
 
     OrderResponse createOrder(OrderCreateRequest request);
     OrderResponse getOrderById(UUID orderId);
+
+    List<OrderResponse> getOrdersByCurrentUser();
+
     List<OrderResponse> getUserOrders(UUID userId);
     OrderResponse updateOrderStatus(UpdateOrderStatusDto request);
 }
