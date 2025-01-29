@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByUser_IdOrderByCreatedAtDesc(UUID userId);
+
+    List<Order> findByUserEmail(String email);
 }

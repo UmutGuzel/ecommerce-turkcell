@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface CartRepository extends JpaRepository<Cart, UUID> {
     Cart findByUserId(UUID userId);
+
+    Optional<Cart> findByIdAndUserEmail(UUID cartId, String email);
 }

@@ -4,6 +4,7 @@ import com.turkcell.ecommerce.dto.cart.AddProductToCartDto;
 import com.turkcell.ecommerce.dto.cart.CartDto;
 import com.turkcell.ecommerce.dto.cart.DeleteProductFromCartDto;
 import com.turkcell.ecommerce.dto.cart.UpdateCartProductQuantityDto;
+import com.turkcell.ecommerce.entity.Cart;
 import com.turkcell.ecommerce.entity.User;
 
 import java.util.UUID;
@@ -18,4 +19,8 @@ public interface CartService {
     void updateCartProductQuantity(UpdateCartProductQuantityDto updateCartProductQuantityDto);
 
     void deleteProductFromCart(DeleteProductFromCartDto deleteProductFromCartDto);
+
+    Cart getCartByIdAndUserEmail(UUID cartId, String email);
+
+    void clearCart(UUID id);
 }
