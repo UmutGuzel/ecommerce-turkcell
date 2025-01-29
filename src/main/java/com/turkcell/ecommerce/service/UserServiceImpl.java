@@ -1,14 +1,12 @@
 package com.turkcell.ecommerce.service;
 
-import com.turkcell.ecommerce.dto.user.CreateUserDto;
-import com.turkcell.ecommerce.dto.user.ListUserDto;
-import com.turkcell.ecommerce.dto.user.ChangeUserPasswordDto;
-import com.turkcell.ecommerce.dto.user.LoginUserDto;
+import com.turkcell.ecommerce.dto.user.*;
 import com.turkcell.ecommerce.entity.Role;
 import com.turkcell.ecommerce.entity.User;
 import com.turkcell.ecommerce.mapper.UserMapper;
 import com.turkcell.ecommerce.repository.UserRepository;
 import com.turkcell.ecommerce.rules.UserBusinessRules;
+import com.turkcell.ecommerce.util.exception.type.BusinessException;
 import com.turkcell.ecommerce.util.jwt.JwtService;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,8 +63,12 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void changeRole() {
-        //TODO: admin role change functionality
+    public ResponseRoleUserDto changeRole(ChangeRoleUserDto changeRoleUserDto) {
+        User user = userRepository.findByEmail(changeRoleUserDto.getEmail()).orElseThrow( () -> new BusinessException("Kullanıcı bulunamadı"));
+        List<Role> roles = roleService.getRolesByNames(changeRoleUserDto.getRoles());
+        user.setRoles(roles);
+        user = userRepository.save(user);
+        return userMapper.toResponseRoleUserDto(user);
     }
 
     @Override
