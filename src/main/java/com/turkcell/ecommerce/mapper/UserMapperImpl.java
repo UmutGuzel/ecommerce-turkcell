@@ -3,6 +3,7 @@ package com.turkcell.ecommerce.mapper;
 import com.turkcell.ecommerce.dto.user.CreateUserDto;
 import com.turkcell.ecommerce.dto.user.ListUserDto;
 import com.turkcell.ecommerce.dto.user.ChangeUserPasswordDto;
+import com.turkcell.ecommerce.dto.user.ResponseRoleUserDto;
 import com.turkcell.ecommerce.entity.Role;
 import com.turkcell.ecommerce.entity.User;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,16 @@ public class UserMapperImpl implements UserMapper {
                 listUserDto.setName(user.getName());
                 listUserDto.setSurname(user.getSurname());
                 listUserDto.setEmail(user.getEmail());
+                listUserDto.setRoles(user.getRoles().stream().map(Role::getName).toList());
                 return listUserDto;
             }).toList();
         }
+
+    @Override
+    public ResponseRoleUserDto toResponseRoleUserDto(User user) {
+        ResponseRoleUserDto responseRoleUserDto = new ResponseRoleUserDto();
+        responseRoleUserDto.setEmail(user.getEmail());
+        responseRoleUserDto.setRoles(user.getRoles().stream().map(Role::getName).toList());
+        return responseRoleUserDto;
     }
+}

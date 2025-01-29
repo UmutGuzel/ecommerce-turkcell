@@ -1,9 +1,6 @@
 package com.turkcell.ecommerce.controller;
 
-import com.turkcell.ecommerce.dto.user.ChangeUserPasswordDto;
-import com.turkcell.ecommerce.dto.user.CreateUserDto;
-import com.turkcell.ecommerce.dto.user.ListUserDto;
-import com.turkcell.ecommerce.dto.user.LoginUserDto;
+import com.turkcell.ecommerce.dto.user.*;
 import com.turkcell.ecommerce.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +33,11 @@ public class UserController {
     @PostMapping("/login")
     public String login(@RequestBody @Valid LoginUserDto loginUserDto) {
         return userService.login(loginUserDto);
+    }
+
+    @PutMapping("/change-role")
+    public void changeRole(@RequestBody ChangeRoleUserDto changeRoleUserDto) {
+        userService.changeRole(changeRoleUserDto);
     }
 
 }
