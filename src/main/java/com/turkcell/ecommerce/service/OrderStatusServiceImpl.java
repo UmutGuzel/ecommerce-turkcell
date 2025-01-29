@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderStatusServiceImpl implements OrderStatusService {
@@ -49,6 +50,11 @@ public class OrderStatusServiceImpl implements OrderStatusService {
     @Override
     public List<OrderStatusDto> getAll() {
         return orderStatusRepository.findAll().stream().map(orderStatusMapper::toDto).toList();
+    }
+
+    @Override
+    public OrderStatus getByStatus(String status) {
+        return orderStatusRepository.findByStatus(status).orElse(null);
     }
 
 }
